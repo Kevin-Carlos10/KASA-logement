@@ -1,0 +1,19 @@
+Django>=5.0,<5.2
+djangorestframework>=3.15
+djangorestframework-camel-case>=1.4.2
+django-filter>=24.2
+psycopg2-binary>=2.9
+django-cors-headers>=4.4
+python-decouple>=3.8
+Pillow>=10.4
+djangorestframework-simplejwt
+
+# GeoDjango (django.contrib.gis) a besoin des librairies système suivantes
+# (PAS installables via pip) :
+#   - GDAL
+#   - GEOS
+#   - PROJ
+#   - PostgreSQL + extension PostGIS sur la base de données
+#
+# Ubuntu/Debian : sudo apt install gdal-bin libgdal-dev libgeos-dev libproj-dev postgis
+# macOS (brew)  : brew install gdal geos proj postgis

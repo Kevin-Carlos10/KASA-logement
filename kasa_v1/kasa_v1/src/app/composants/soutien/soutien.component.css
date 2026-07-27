@@ -1,0 +1,207 @@
+@import '../../styles/design-tokens.css';
+
+.soutien-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+}
+
+/* ══════════════════════ BANDEAU DEMANDE DE SOUTIEN ══════════════════════ */
+.kd-aide-banner {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--color-warning-bg);
+  border: 1px solid var(--color-warning-bg);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.kd-aide-banner svg {
+  color: var(--color-warning);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.kd-aide-text {
+  flex: 1;
+  min-width: 220px;
+  line-height: 1.6;
+}
+.kd-aide-text strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+.kd-aide-btn {
+  flex-shrink: 0;
+  align-self: center;
+  background: var(--color-ink-soft);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.kd-aide-btn:hover {
+  opacity: 0.85;
+}
+@media (max-width: 480px) {
+  .kd-aide-btn {
+    width: 100%;
+  }
+}
+
+/* ══════════════════════ MODAL : DEMANDE DE SOUTIEN ══════════════════════ */
+.kd-aide-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(0, 0, 0, 0.52);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: aideFadeIn 0.18s ease;
+}
+@keyframes aideFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.kd-aide-modal-card {
+  position: relative;
+  background: var(--color-surface);
+  border-radius: 16px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-overlay);
+  animation: aideSlideUp 0.22s ease;
+}
+@keyframes aideSlideUp {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.kd-aide-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-warning-bg);
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+}
+.kd-aide-modal-close:hover {
+  background: var(--color-warning-bg);
+  opacity: 0.8;
+}
+.kd-aide-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  padding-right: 28px;
+}
+.kd-aide-modal-subtitle {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+.kd-aide-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.kd-aide-form__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  margin-top: 8px;
+}
+.kd-aide-form__select,
+.kd-aide-form__input {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: inherit;
+}
+.kd-aide-form__select:focus,
+.kd-aide-form__input:focus {
+  outline: none;
+  border-color: var(--color-warning);
+}
+.kd-aide-form__submit {
+  margin-top: 18px;
+  background: var(--color-ink-soft);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.kd-aide-form__submit:hover:not(:disabled) {
+  opacity: 0.85;
+}
+.kd-aide-form__submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ══════════════════════ TOAST ══════════════════════ */
+.kd-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--color-ink);
+  color: var(--color-surface);
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  box-shadow: var(--shadow-card);
+  z-index: 1200;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.kd-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

@@ -1,0 +1,293 @@
+<div class="carte-conteneur">
+  <!-- ── Bandeau mode sélection de position (création/édition logement) ── -->
+  <div class="bandeau-selection-position" *ngIf="modeSelectionPosition">
+    📍 Cliquez sur la carte pour positionner le logement (le repère peut ensuite être glissé pour affiner)
+  </div>
+
+  <!-- ── Fonds de carte ── -->
+  <div class="controles-fond" role="group" aria-label="Fond de carte">
+    <button
+      type="button"
+      class="bouton-fond"
+      [class.actif]="fondCourant === 'plan'"
+      (click)="changerFond('plan')"
+    >
+      🗺️ Plan
+    </button>
+    <button
+      type="button"
+      class="bouton-fond"
+      [class.actif]="fondCourant === 'satellite'"
+      (click)="changerFond('satellite')"
+    >
+      🛰️ Satellite
+    </button>
+    <button
+      type="button"
+      class="bouton-fond"
+      [class.actif]="fondCourant === 'hybride'"
+      (click)="changerFond('hybride')"
+    >
+      🧭 Hybride
+    </button>
+  </div>
+
+  <!-- ── Compteur résultats ── -->
+  <div class="compteur-resultats" *ngIf="logements.length">
+    🏠 {{ logements.length }} logement{{ logements.length > 1 ? 's' : '' }}
+    <span class="compteur-niveau" *ngIf="!modeMini">· {{ niveauZone }}</span>
+  </div>
+
+  <!-- ── Conteneur MapLibre ── -->
+  <div #conteneurCarte class="carte"></div>
+
+  <!-- ════ CONTRÔLES AVANCÉS (masqués en mode mini) ════ -->
+  <ng-container *ngIf="!modeMini">
+    <!-- ── Barre de contrôles droite ── -->
+    <div class="barre-droite">
+      <!-- Zones géographiques -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">ZONES</div>
+        <button
+          class="ctrl-btn"
+          [class.ctrl-btn--actif]="afficherQuartiers"
+          (click)="basculerQuartiers()"
+          title="Afficher les contours des quartiers avec statistiques"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="13"
+            height="13"
+          >
+            <polygon points="3 11 22 2 13 21 11 13 3 11" />
+          </svg>
+          Quartiers
+        </button>
+        <button
+          class="ctrl-btn"
+          [class.ctrl-btn--actif]="afficherVilles"
+          (click)="basculerVilles()"
+          title="Vue nationale : toutes les villes du Burkina Faso"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="13"
+            height="13"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="2" y1="12" x2="22" y2="12" />
+            <path
+              d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+            />
+          </svg>
+          Villes BF
+        </button>
+      </div>
+
+      <!-- Couches POI -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">AFFICHER</div>
+        <button
+          class="ctrl-btn"
+          [class.ctrl-btn--actif]="panneauOuvert === 'couches'"
+          (click)="basculerPanneau('couches')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="13"
+            height="13"
+          >
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5" />
+            <path d="M2 12l10 5 10-5" />
+          </svg>
+          Lieux
+        </button>
+      </div>
+
+      <!-- Proximité -->
+      <div class="ctrl-group">
+        <div class="ctrl-label">PROXIMITÉ</div>
+        <button
+          class="ctrl-btn"
+          [class.ctrl-btn--actif]="panneauOuvert === 'proximite'"
+          (click)="basculerPanneau('proximite')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="13"
+            height="13"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          Temps trajet
+          <span class="ctrl-badge" *ngIf="lieuxReference.length">{{ lieuxReference.length }}</span>
+        </button>
+      </div>
+
+      <!-- Recentrer -->
+      <button
+        class="ctrl-btn ctrl-btn--icon"
+        (click)="recentrer()"
+        title="Recentrer sur les logements"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          width="15"
+          height="15"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── Panneau couches POI ── -->
+    <div class="panneau-lateral" [class.panneau-lateral--ouvert]="panneauOuvert === 'couches'">
+      <div class="panneau-titre">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          width="13"
+          height="13"
+        >
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+        </svg>
+        Afficher sur la carte
+      </div>
+      <label class="panneau-ligne" *ngFor="let couche of couchesAffichage">
+        <input type="checkbox" [checked]="couche.actif" (change)="basculerCouche(couche)" />
+        <span class="puce" [style.backgroundColor]="couche.couleur"></span>
+        {{ couche.label }}
+      </label>
+    </div>
+
+    <!-- ── Panneau recherche par proximité ── -->
+    <div
+      class="panneau-lateral panneau-proximite"
+      [class.panneau-lateral--ouvert]="panneauOuvert === 'proximite'"
+    >
+      <div class="panneau-titre">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          width="13"
+          height="13"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        Recherche par proximité
+      </div>
+      <div class="panneau-desc">
+        Ajoutez un lieu important (travail, école…) pour voir les logements proches et leur temps de
+        trajet.
+      </div>
+
+      <!-- Formulaire ajout lieu -->
+      <div class="prox-form">
+        <select class="prox-select" [(ngModel)]="nouvelleCategorie">
+          <option *ngFor="let cat of categoriesProximite" [value]="cat">
+            {{ iconesCategorie[cat] }} {{ labelsCategorie[cat] }}
+          </option>
+        </select>
+        <input
+          class="prox-input"
+          type="text"
+          [(ngModel)]="nouveauLibelle"
+          placeholder="Ex : Mon bureau, CHU Yalgado…"
+          (keyup.enter)="ajouterLieu()"
+        />
+        <button class="prox-add-btn" (click)="ajouterLieu()" [disabled]="!nouveauLibelle.trim()">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.4"
+            width="13"
+            height="13"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Ajouter
+        </button>
+      </div>
+
+      <!-- Lieux ajoutés + résultats -->
+      <div class="prox-list" *ngIf="lieuxReference.length">
+        <div class="prox-item" *ngFor="let lieu of lieuxReference">
+          <div class="prox-item-header">
+            <span class="prox-icone">{{ iconesCategorie[lieu.categorie] }}</span>
+            <span class="prox-libelle">{{ lieu.libelle }}</span>
+            <button class="prox-suppr" (click)="supprimerLieu(lieu.id)" title="Supprimer">✕</button>
+          </div>
+          <ng-container *ngFor="let r of resultatsProximite">
+            <div class="prox-result" *ngIf="r.lieuId === lieu.id">
+              <span class="prox-result-nb"
+                >🏠 {{ r.nombreLogementsProches }} logement{{
+                  r.nombreLogementsProches > 1 ? 's' : ''
+                }}</span
+              >
+              <span class="prox-result-rayon"
+                >dans un rayon de
+                {{
+                  (lieu.rayonMetres ?? 2000) >= 1000
+                    ? (lieu.rayonMetres! / 1000).toFixed(1) + ' km'
+                    : lieu.rayonMetres + ' m'
+                }}</span
+              >
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="prox-vide" *ngIf="!lieuxReference.length">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          width="28"
+          height="28"
+        >
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
+        <div>Aucun lieu ajouté</div>
+        <div class="prox-vide-sub">Exemple : "8 min de mon lieu de travail"</div>
+      </div>
+    </div>
+
+    <!-- ── Légende couleurs zones ── -->
+    <div class="legende-zones" *ngIf="legendeVisible">
+      <div class="legende-titre">Prix moyen / mois</div>
+      <div class="legende-row" *ngFor="let item of legendePrix">
+        <span class="legende-puce" [style.background]="item.couleur"></span>
+        {{ item.label }}
+      </div>
+    </div>
+
+    <!-- ── Stats quartier survolé (optionnel) ── -->
+  </ng-container>
+</div>

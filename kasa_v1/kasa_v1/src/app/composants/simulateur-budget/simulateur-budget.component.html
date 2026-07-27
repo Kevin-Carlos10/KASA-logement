@@ -1,0 +1,157 @@
+<app-barre-navigation />
+<section class="sb-page">
+  <header class="sb-header">
+    <h1 class="sb-title">Combien de loyer puis-je me permettre&nbsp;?</h1>
+    <p class="sb-subtitle">
+      Indiquez votre revenu mensuel et ajustez la part que vous souhaitez consacrer au loyer.
+      Nous calculons votre budget en direct et vous proposons des annonces adaptées.
+    </p>
+  </header>
+
+  <div class="sb-grid">
+    <!-- ── Colonne gauche : saisie ─────────────────────────────────────────── -->
+    <div class="sb-card sb-card--form">
+      <label class="sb-label" for="revenu">Revenu mensuel net (avant dépenses)</label>
+      <div class="sb-input-row">
+        <span class="sb-devise-prefix">FCFA</span>
+        <input
+          id="revenu"
+          class="sb-input"
+          type="number"
+          min="0"
+          step="5000"
+          inputmode="numeric"
+          placeholder="ex : 150 000"
+          [ngModel]="revenuMensuel()"
+          (ngModelChange)="revenuMensuel.set($event)"
+        />
+      </div>
+
+      <div class="sb-champ">
+        <label class="sb-label" for="quartier">Quartier de préférence</label>
+        <div class="sb-select-wrap">
+          <select
+            id="quartier"
+            class="sb-select"
+            [ngModel]="quartier()"
+            (ngModelChange)="quartier.set($event)"
+          >
+            <option value="">Tous les quartiers</option>
+            <option *ngFor="let q of quartiers()" [value]="q">{{ q }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sb-slider-bloc">
+        <div class="sb-slider-tete">
+          <label class="sb-label" for="part">Part du revenu consacrée au loyer</label>
+          <span class="sb-slider-valeur" [class]="'is-' + niveau()">{{ pourcentage() }}%</span>
+        </div>
+        <input
+          id="part"
+          class="sb-slider"
+          type="range"
+          min="10"
+          max="50"
+          step="1"
+          [ngModel]="pourcentage()"
+          (ngModelChange)="pourcentage.set($event)"
+          [style.--part]="((pourcentage() - 10) / 40) * 100 + '%'"
+          aria-label="Part du revenu consacrée au loyer"
+        />
+        <div class="sb-slider-reperes">
+          <span>10%</span>
+          <span>30% recommandé</span>
+          <span>50%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Colonne droite : budget loyer ───────────────────────────────────── -->
+    <div class="sb-card sb-card--result" [class]="'niveau-' + niveau()">
+      <span class="sb-result-label">Votre budget loyer</span>
+      <div class="sb-result-montant">
+        {{ fmt(loyerBudget()) }} <span class="sb-result-unite">FCFA<small>/mois</small></span>
+      </div>
+
+      <div class="sb-badge" [class]="'is-' + niveau()" *ngIf="revenuMensuel()">
+        <ng-container [ngSwitch]="niveau()">
+          <span *ngSwitchCase="'ok'">✓ Budget sain — dans le seuil recommandé (≤ 30%)</span>
+          <span *ngSwitchCase="'limite'">⚠ À surveiller — au-delà de 30% de votre revenu</span>
+          <span *ngSwitchCase="'risque'">⚠ Risqué — au-delà de 40%, risque de surendettement</span>
+        </ng-container>
+      </div>
+
+      <!-- Barre d'allocation loyer vs reste du revenu -->
+      <div class="sb-alloc" *ngIf="revenuMensuel()">
+        <div class="sb-alloc-barre">
+          <div class="sb-alloc-loyer" [style.width.%]="partLoyer()"></div>
+        </div>
+        <div class="sb-alloc-legende">
+          <span><i class="dot dot--loyer"></i> Loyer ({{ pourcentage() }}%)</span>
+          <span><i class="dot dot--reste"></i> Reste du revenu ({{ 100 - pourcentage() }}%)</span>
+        </div>
+      </div>
+
+      <div class="sb-actions" *ngIf="revenuMensuel()">
+        <button class="sb-btn" (click)="allerAuxLogements()">Voir les logements</button>
+        <button class="sb-btn-reset" (click)="reinitialiser()">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Répartition 50/30/20 ──────────────────────────────────────────────── -->
+  <div class="sb-section" *ngIf="revenuMensuel()">
+    <h2 class="sb-section-titre">Votre budget selon la règle 50 / 30 / 20</h2>
+    <p class="sb-section-note">
+      Une base saine pour répartir votre revenu. Idéalement, votre loyer reste dans la part
+      « dépenses essentielles ».
+    </p>
+    <div class="sb-guides">
+      <div class="sb-guide sb-guide--essentiel">
+        <div class="sb-guide-pct">50%</div>
+        <div class="sb-guide-nom">Dépenses essentielles</div>
+        <div class="sb-guide-desc">Loyer, eau, électricité, nourriture</div>
+        <div class="sb-guide-montant">{{ fmt(depensesEssentielles()) }} <small>FCFA/mois</small></div>
+      </div>
+      <div class="sb-guide sb-guide--courant">
+        <div class="sb-guide-pct">30%</div>
+        <div class="sb-guide-nom">Dépenses courantes</div>
+        <div class="sb-guide-desc">Transport, loisirs, téléphone</div>
+        <div class="sb-guide-montant">{{ fmt(depensesCourantes()) }} <small>FCFA/mois</small></div>
+      </div>
+      <div class="sb-guide sb-guide--epargne">
+        <div class="sb-guide-pct">20%</div>
+        <div class="sb-guide-nom">Épargne</div>
+        <div class="sb-guide-desc">Caution, imprévus, projets</div>
+        <div class="sb-guide-montant">{{ fmt(epargne()) }} <small>FCFA/mois</small></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Annonces adaptées (live) ──────────────────────────────────────────── -->
+  <div class="sb-section" *ngIf="revenuMensuel()">
+    <h2 class="sb-section-titre">
+      Annonces dans votre budget<span *ngIf="quartier()"> · {{ quartier() }}</span>
+    </h2>
+
+    <div class="sb-suggestions-liste" *ngIf="suggestions().length; else vide">
+      <article class="sb-suggestion-carte" *ngFor="let l of suggestions()">
+        <img class="sb-suggestion-img" [src]="l.images[0]" [alt]="l.typeBien + ' ' + l.quartier" />
+        <div class="sb-suggestion-infos">
+          <div class="sb-suggestion-titre">{{ l.typeBien }} · {{ l.quartier }}</div>
+          <div class="sb-suggestion-prix">{{ fmt(l.prix) }} {{ l.devise }} <small>/ mois</small></div>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #vide>
+      <div class="sb-vide" *ngIf="recherche()">Recherche des annonces…</div>
+      <div class="sb-vide" *ngIf="!recherche()">
+        Aucune annonce dans ce budget<span *ngIf="quartier()"> à {{ quartier() }}</span> pour le
+        moment. <span *ngIf="quartier()">Essayez « Tous les quartiers », </span>augmentez légèrement
+        la part loyer, ou élargissez votre recherche depuis la page Logements.
+      </div>
+    </ng-template>
+  </div>
+</section>

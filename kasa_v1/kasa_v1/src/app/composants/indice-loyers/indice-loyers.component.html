@@ -1,0 +1,179 @@
+<app-barre-navigation />
+<div class="il-page">
+
+  <!-- ══ En-tête ══ -->
+  <header class="il-header">
+    <div class="il-header__inner">
+      <span class="il-eyebrow">Données KaSa vérifiées</span>
+      <h1 class="il-title">Indice des loyers</h1>
+      <p class="il-subtitle">
+        Évolution par période de 4 mois selon le quartier et le type de bien — Ouagadougou
+      </p>
+    </div>
+  </header>
+
+  <!-- ══ Filtres ══ -->
+  <div class="il-filters">
+    <div class="il-filter-group">
+      <label class="il-filter-label" for="sel-quartier">Quartier</label>
+      <select
+        id="sel-quartier"
+        class="il-select"
+        [(ngModel)]="quartierSelectionne"
+        (ngModelChange)="onFiltreChange()"
+      >
+        <option *ngFor="let q of quartiers" [value]="q[0]">{{ q[1] }}</option>
+      </select>
+    </div>
+    <div class="il-filter-group">
+      <label class="il-filter-label" for="sel-type">Type de bien</label>
+      <select
+        id="sel-type"
+        class="il-select"
+        [(ngModel)]="typeBienSelectionne"
+        (ngModelChange)="onFiltreChange()"
+      >
+        <option *ngFor="let t of typesBiens" [value]="t[0]">{{ t[1] | titlecase }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ══ KPIs ══ -->
+  <div class="il-kpis">
+    <div class="il-kpi">
+      <span class="il-kpi__label">Loyer médian actuel</span>
+      <strong class="il-kpi__value">{{ formaterPrix(loyerActuel) }}</strong>
+    </div>
+    <div class="il-kpi">
+      <span class="il-kpi__label">Évolution sur la période</span>
+      <strong class="il-kpi__value" [class.il-kpi__value--up]="deltaHausse" [class.il-kpi__value--down]="!deltaHausse">
+        {{ deltaHausse ? '↗' : '↘' }} {{ deltaHausse ? '+' : '' }}{{ deltaPct }} %
+      </strong>
+    </div>
+    <div class="il-kpi">
+      <span class="il-kpi__label">Annonces analysées</span>
+      <strong class="il-kpi__value">{{ serie.nbAnnonces }}</strong>
+    </div>
+    <div class="il-kpi">
+      <span class="il-kpi__label">Dernière période</span>
+      <strong class="il-kpi__value il-kpi__value--period">{{ periodeActuelle }}</strong>
+    </div>
+  </div>
+
+  <!-- ══ Graphique ══ -->
+  <div class="il-card">
+    <div class="il-card__header">
+      <span class="il-card__title">
+        {{ nomType | titlecase }} · {{ nomQuartier }}
+      </span>
+      <span class="il-card__badge">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+        KaSa vérifié
+      </span>
+    </div>
+
+    <div class="il-chart-wrap">
+      <canvas
+        #canvas
+        role="img"
+        [attr.aria-label]="'Courbe d\'évolution des loyers : ' + nomType + ' à ' + nomQuartier"
+      >
+        Données de loyer par périodes de 4 mois pour {{ nomType }} à {{ nomQuartier }}.
+      </canvas>
+    </div>
+
+    <p class="il-note">{{ noteSource }}</p>
+  </div>
+
+  <!-- ══ Vérificateur « Ce loyer est-il juste ? » ══ -->
+  <div class="il-card il-check">
+    <div class="il-card__header">
+      <span class="il-card__title">Ce loyer est-il juste ?</span>
+    </div>
+    <p class="il-check__hint">
+      Un loyer vous est proposé pour un <strong>{{ nomTypeSingulier }}</strong>
+      à <strong>{{ nomQuartier }}</strong> ? Saisissez-le pour le comparer à la médiane du marché.
+    </p>
+
+    <div class="il-check__row">
+      <div class="il-input-wrap">
+        <input
+          class="il-input"
+          type="number"
+          min="0"
+          step="5000"
+          inputmode="numeric"
+          placeholder="ex : {{ loyerActuel }}"
+          [(ngModel)]="loyerVerifie"
+        />
+        <span class="il-input__suffix">FCFA</span>
+      </div>
+      <span class="il-check__mediane">Médiane marché&nbsp;: <strong>{{ formaterPrix(loyerActuel) }}</strong></span>
+    </div>
+
+    <div class="il-verdict" *ngIf="verdict" [attr.data-verdict]="verdict">
+      <div class="il-verdict__head">
+        <span class="il-verdict__badge">{{ verdictTitre }}</span>
+        <span class="il-verdict__ecart">{{ (ecartPct ?? 0) > 0 ? '+' : '' }}{{ ecartPct }} % vs médiane</span>
+      </div>
+
+      <!-- Jauge : position du loyer proposé autour de la médiane -->
+      <div class="il-gauge">
+        <div class="il-gauge__track">
+          <span class="il-gauge__zone il-gauge__zone--bon"></span>
+          <span class="il-gauge__zone il-gauge__zone--marche"></span>
+          <span class="il-gauge__zone il-gauge__zone--eleve"></span>
+        </div>
+        <span class="il-gauge__median" title="Médiane du marché"></span>
+        <span class="il-gauge__marker" [style.left.%]="positionGauge"></span>
+      </div>
+      <div class="il-gauge__legende">
+        <span>Bonne affaire</span>
+        <span>Prix du marché</span>
+        <span>Trop cher</span>
+      </div>
+
+      <p class="il-verdict__msg">{{ verdictMessage }}</p>
+    </div>
+  </div>
+
+  <!-- ══ Comparateur « Où payer moins ? » ══ -->
+  <div class="il-card">
+    <div class="il-card__header">
+      <span class="il-card__title">Où payer moins pour un {{ nomTypeSingulier }} ?</span>
+    </div>
+    <p class="il-check__hint" *ngIf="economieMax > 0">
+      Le quartier le moins cher est <strong>{{ quartierLeMoinsCher.nom }}</strong> :
+      jusqu'à <strong>{{ formaterPrix(economieMax) }}/mois d'économie</strong> par rapport à
+      {{ nomQuartier }}. Cliquez un quartier pour l'explorer.
+    </p>
+    <p class="il-check__hint" *ngIf="economieMax === 0">
+      {{ nomQuartier }} est déjà le quartier le moins cher pour ce type de bien. Cliquez un quartier
+      pour comparer.
+    </p>
+
+    <ul class="il-compare">
+      <li
+        *ngFor="let c of comparaisonQuartiers; let i = index"
+        class="il-compare__row"
+        [class.is-active]="c.actif"
+        [class.is-cheapest]="i === 0"
+        (click)="choisirQuartier(c.key)"
+      >
+        <span class="il-compare__rank">{{ i + 1 }}</span>
+        <span class="il-compare__nom">
+          {{ c.nom }}
+          <span class="il-compare__tag" *ngIf="i === 0">le moins cher</span>
+          <span class="il-compare__tag il-compare__tag--sel" *ngIf="c.actif">sélectionné</span>
+        </span>
+        <span class="il-compare__bar-wrap">
+          <span class="il-compare__bar" [style.width.%]="c.largeur"></span>
+        </span>
+        <span class="il-compare__prix">{{ formaterPrix(c.mediane) }}</span>
+      </li>
+    </ul>
+  </div>
+
+</div>

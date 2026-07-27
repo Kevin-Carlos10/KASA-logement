@@ -1,0 +1,268 @@
+<app-barre-navigation />
+<section class="art-page">
+
+  <!-- ══ EN-TÊTE ══ -->
+  <header class="art-header">
+    <h1 class="art-title">Un problème dans votre logement&nbsp;?</h1>
+    <p class="art-subtitle">
+      Contactez en un clic un artisan ou un expert vérifié à Ouagadougou pour venir le résoudre —
+      choisissez le métier, puis échangez directement sur WhatsApp. Tarifs de référence affichés.
+    </p>
+  </header>
+
+  <!-- ══ FILTRES CATÉGORIES (ordonnés par service le plus demandé) ══ -->
+  <div class="art-filtres">
+    <button
+      class="art-chip art-chip--tous"
+      [class.art-chip--actif]="!categorieActive"
+      (click)="afficherTous()"
+    >
+      Tous les métiers
+    </button>
+
+    <button
+      class="art-chip"
+      *ngFor="let c of categories"
+      [class.art-chip--actif]="categorieActive === c"
+      (click)="filtrerCategorie(c)"
+    >
+      <span class="art-chip__ico" aria-hidden="true">{{ icones[c] }}</span>
+      {{ c }}
+    </button>
+  </div>
+
+  <!-- ══ COMPTEUR ══ -->
+  <div class="art-compteur" *ngIf="listeAffichee.length">
+    <span>{{ listeAffichee.length }} professionnel{{ listeAffichee.length > 1 ? 's' : '' }}
+      {{ categorieActive ? '· ' + categorieActive : '' }}</span>
+  </div>
+
+  <!-- ══ GRILLE ══ -->
+  <div class="art-liste" *ngIf="listeAffichee.length; else vide">
+    <article class="art-carte" *ngFor="let a of listeAffichee" (click)="ouvrirProfil(a)">
+
+      <!-- Tête de carte -->
+      <div class="art-carte-head">
+        <div class="art-avatar" [style.background]="a.couleurAvatar">{{ a.initiales }}</div>
+        <div class="art-carte-infos">
+          <div class="art-nom-row">
+            <span class="art-nom">{{ a.nom }}</span>
+          </div>
+          <div class="art-specialite">{{ a.specialite }}</div>
+          <div class="art-metier-loc">
+            <span class="art-metier-ico" aria-hidden="true">{{ icones[a.metier] }}</span>
+            {{ a.metier }} · {{ a.quartier }}
+          </div>
+        </div>
+        <span class="art-statut" [class.art-statut--dispo]="a.disponible" [class.art-statut--indispo]="!a.disponible">
+          {{ a.disponible ? 'Disponible' : 'Indisponible' }}
+        </span>
+      </div>
+
+      <!-- Note + expérience -->
+      <div class="art-note-row">
+        <span class="art-etoiles" aria-hidden="true">
+          <svg *ngFor="let e of etoiles(a.note)" width="13" height="13" viewBox="0 0 24 24"
+            [attr.fill]="e ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5">
+            <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/>
+          </svg>
+        </span>
+        <span class="art-note-val">{{ a.note.toFixed(1) }}</span>
+        <span class="art-note-nb">{{ a.nombreAvis }} avis </span>
+        <span class="art-exp">{{ a.anneesExperience }} ans exp.</span>
+      </div>
+
+      <!-- ── Ce qui distingue ce professionnel (spécifique au métier) ── -->
+
+
+      <!-- Repère tarifaire -->
+      <div class="art-prix-depart">
+        <span>À partir de</span>
+        <strong>{{ prixDepart(a).prixReference.toLocaleString('fr-FR') }} {{ prixDepart(a).devise }}</strong>
+        <span *ngIf="prixDepart(a).typeTarification !== 'forfait'">/ {{ prixDepart(a).typeTarification === 'horaire' ? 'h' : 'm²' }}</span>
+      </div>
+
+      <!-- Actions -->
+      <div class="art-actions">
+        <button class="art-btn-profil" (click)="ouvrirProfil(a); $event.stopPropagation()">
+          Voir profil
+        </button>
+        <button class="art-btn-contact" [disabled]="!a.disponible" (click)="ouvrirContact(a); $event.stopPropagation()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+          </svg>
+          Contacter
+        </button>
+      </div>
+
+    </article>
+  </div>
+
+  <ng-template #vide>
+    <div class="art-vide">
+      <div class="art-vide-icone">🔍</div>
+      Aucun professionnel disponible pour ce filtre.
+    </div>
+  </ng-template>
+
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODALE PROFIL COMPLET — le détail rassemble toute l'information
+══════════════════════════════════════════════════════════════ -->
+<div class="art-overlay" *ngIf="artisanProfil" (click)="surFondClick($event, fermerProfil.bind(this))">
+  <div class="art-modal art-modal--profil" (click)="$event.stopPropagation()">
+
+    <!-- Fermer -->
+    <button class="art-modal-close" (click)="fermerProfil()" aria-label="Fermer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <!-- Hero profil -->
+    <div class="art-profil-hero">
+      <div class="art-profil-av" [style.background]="artisanProfil.couleurAvatar">
+        {{ artisanProfil.initiales }}
+      </div>
+      <div class="art-profil-hero-info">
+        <div class="art-profil-nom-row">
+          <span class="art-profil-nom">{{ artisanProfil.nom }}</span>
+          <span class="art-verifie-badge" *ngIf="artisanProfil.estVerifie">✓ Vérifié</span>
+        </div>
+        <div class="art-profil-specialite">{{ artisanProfil.specialite }}</div>
+        <div class="art-profil-meta">
+          {{ icones[artisanProfil.metier] }} {{ artisanProfil.metier }} ·
+          {{ artisanProfil.quartier }}
+        </div>
+        <span class="art-statut art-profil-statut"
+          [class.art-statut--dispo]="artisanProfil.disponible"
+          [class.art-statut--indispo]="!artisanProfil.disponible">
+          {{ artisanProfil.disponible ? 'Disponible maintenant' : 'Actuellement indisponible' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Faits clés : ce qu'un locataire regarde en premier -->
+    <div class="art-profil-faits">
+      <div class="art-fait">
+        <span class="art-fait-val">
+          <svg class="art-fait-star" width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/>
+          </svg>
+          {{ artisanProfil.note.toFixed(1) }}
+        </span>
+        <span class="art-fait-lib">{{ artisanProfil.nombreAvis }} avis</span>
+      </div>
+      <div class="art-fait">
+        <span class="art-fait-val">{{ artisanProfil.nombreInterventions }}</span>
+        <span class="art-fait-lib">interventions</span>
+      </div>
+      <div class="art-fait">
+        <span class="art-fait-val">{{ artisanProfil.anneesExperience }}</span>
+        <span class="art-fait-lib">ans d'expérience</span>
+      </div>
+    </div>
+
+    <!-- Points forts (spécifiques au métier — l'information utile à voir) -->
+    <div class="art-profil-section-title">Points forts</div>
+    <ul class="art-points-forts art-points-forts--profil">
+      <li *ngFor="let pt of artisanProfil.pointsForts">{{ pt }}</li>
+    </ul>
+
+    <!-- Prestations -->
+    <div class="art-profil-section-title">Prestations & tarifs</div>
+    <ul class="art-prestations art-profil-prestations">
+      <li *ngFor="let p of artisanProfil.prestations">
+        <span>{{ p.libelle }}</span>
+        <strong>{{ p.prixReference.toLocaleString('fr-FR') }} {{ p.devise }}{{ p.typeTarification === 'horaire' ? ' / h' : p.typeTarification === 'au_m2' ? ' / m²' : '' }}</strong>
+      </li>
+    </ul>
+
+    <!-- Avis clients (les plus récents) -->
+    <div class="art-profil-section-title" *ngIf="artisanProfil.avis.length">Avis récents</div>
+    <div class="art-avis-liste">
+      <div class="art-avis-item" *ngFor="let av of artisanProfil.avis | slice:0:2">
+        <div class="art-avis-item-head">
+          <div class="art-avis-av">{{ av.initiales }}</div>
+          <div class="art-avis-item-info">
+            <span class="art-avis-auteur">{{ av.auteur }}</span>
+            <span class="art-avis-date">{{ av.date }}</span>
+          </div>
+          <div class="art-avis-etoiles">
+            <svg *ngFor="let e of etoiles(av.note)" width="11" height="11" viewBox="0 0 24 24"
+              [attr.fill]="e ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="1.5">
+              <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9"/>
+            </svg>
+          </div>
+        </div>
+        <p class="art-avis-texte">« {{ av.texte }} »</p>
+      </div>
+    </div>
+
+    <!-- Actions profil -->
+    <div class="art-profil-actions">
+      <button class="art-btn-profil art-btn-profil--full" (click)="fermerProfil()">Fermer</button>
+      <button class="art-btn-contact art-btn-contact--full" [disabled]="!artisanProfil.disponible" (click)="ouvrirContact(artisanProfil)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+        </svg>
+        Contacter sur WhatsApp
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════════
+     MODALE CONTACT WHATSAPP
+══════════════════════════════════════════════════════════════ -->
+<div class="art-overlay" *ngIf="artisanContact" (click)="surFondClick($event, fermerContact.bind(this))">
+  <div class="art-modal" (click)="$event.stopPropagation()">
+
+    <button class="art-modal-close" (click)="fermerContact()" aria-label="Fermer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+    <div class="art-modal-head">
+      <div class="art-avatar" [style.background]="artisanContact.couleurAvatar" style="width:44px;height:44px;font-size:16px;">
+        {{ artisanContact.initiales }}
+      </div>
+      <div>
+        <div class="art-modal-title">Contacter {{ artisanContact.nom }}</div>
+        <div class="art-modal-sub">{{ artisanContact.specialite }}</div>
+      </div>
+    </div>
+
+    <label class="art-modal-label">
+      Votre besoin
+      <input class="art-modal-input" type="text" [(ngModel)]="besoin"
+        [placeholder]="'ex : ' + artisanContact.specialite.split('·')[0].trim()"/>
+    </label>
+
+    <label class="art-modal-label">
+      Votre adresse / quartier
+      <input class="art-modal-input" type="text" [(ngModel)]="position"
+        placeholder="ex : Ouaga 2000, secteur 15"/>
+    </label>
+
+    <p class="art-modal-note">
+      Vous serez redirigé vers WhatsApp avec un message pré-rempli. Le paiement se fait via KaSa, une fois l'intervention validée.
+    </p>
+
+    <div class="art-modal-actions">
+      <button class="art-modal-cancel" (click)="fermerContact()">Annuler</button>
+      <button class="art-modal-confirm" (click)="envoyerWhatsapp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z"/>
+        </svg>
+        Ouvrir WhatsApp
+      </button>
+    </div>
+
+  </div>
+</div>

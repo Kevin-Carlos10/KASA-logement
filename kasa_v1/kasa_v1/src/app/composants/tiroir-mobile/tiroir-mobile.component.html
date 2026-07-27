@@ -1,0 +1,39 @@
+<div class="tiroir" *ngIf="logement" role="dialog" aria-modal="true">
+  <!-- Poignée de glissement -->
+  <div class="tiroir__poignee" aria-hidden="true"></div>
+
+  <div class="tiroir__contenu">
+    <!-- Image -->
+    <div class="tiroir__image-wrap">
+      <img
+        [src]="logement.images[0]"
+        [alt]="logement.typeBien + ' à ' + logement.quartier"
+        class="tiroir__image"
+      />
+      <span class="tiroir__badge" *ngIf="logement.hote.estVerifie">✔ Vérifié BBV</span>
+    </div>
+
+    <!-- Infos -->
+    <div class="tiroir__infos">
+      <div class="tiroir__ligne-prix">
+        <span class="tiroir__prix"
+          >{{ logement.prix | number: '1.0-0' }} {{ logement.devise }}</span
+        >
+        <span class="tiroir__periode">/ mois</span>
+        <span class="tiroir__note">★ {{ logement.hote.note }}</span>
+      </div>
+
+      <p class="tiroir__meta">
+        {{ logement.typeBien }} · {{ logement.quartier }}, {{ logement.ville }} ·
+        {{ logement.nombreChambres }} ch.
+      </p>
+
+      <p class="tiroir__distance">📍 {{ logement.distanceKm }} km de vous</p>
+
+      <button class="tiroir__btn-detail" (click)="surVoirDetail()">Voir le détail →</button>
+    </div>
+  </div>
+
+  <!-- Bouton fermer -->
+  <button class="tiroir__fermer" (click)="fermer.emit()" aria-label="Fermer">✕</button>
+</div>

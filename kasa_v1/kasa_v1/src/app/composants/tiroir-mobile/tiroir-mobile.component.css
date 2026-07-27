@@ -1,0 +1,160 @@
+@import '../../styles/design-tokens.css';
+.tiroir {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background: var(--color-bg);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+  animation: glisserHaut 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+@keyframes glisserHaut {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.tiroir__poignee {
+  width: 40px;
+  height: 4px;
+  background: var(--color-surface-tint);
+  border-radius: 2px;
+  margin: 12px auto 0;
+}
+
+.tiroir__contenu {
+  display: flex;
+  gap: 14px;
+  padding: 14px 16px 16px;
+}
+
+.tiroir__image-wrap {
+  position: relative;
+  width: 100px;
+  height: 90px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tiroir__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tiroir__badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  color: var(--color-surface);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.tiroir__infos {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tiroir__ligne-prix {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tiroir__prix {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-ink);
+  letter-spacing: -0.3px;
+}
+
+.tiroir__periode {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+}
+
+.tiroir__note {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  font-weight: 600;
+}
+
+.tiroir__meta {
+  font-size: 13px;
+  color: var(--color-ink-soft);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tiroir__distance {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  margin: 0;
+}
+
+.tiroir__btn-detail {
+  margin-top: 8px;
+  background: var(--color-surface-tint);
+  color: var(--color-ink);
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  align-self: flex-start;
+  transition:
+    background 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.tiroir__btn-detail:hover {
+  background: var(--color-border);
+  transform: translateY(-1px);
+}
+
+.tiroir__fermer {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.tiroir__fermer:hover {
+  color: var(--color-ink);
+}
+/* ═══ LIENS — palette warm ═══ */
+a {
+  color: var(--color-ink-soft);
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+a:hover {
+  color: var(--color-ink);
+}

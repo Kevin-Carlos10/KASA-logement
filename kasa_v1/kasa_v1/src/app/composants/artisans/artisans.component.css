@@ -1,0 +1,299 @@
+@import '../../styles/design-tokens.css';
+
+/* ============================================================
+   Artisans & Services — aligné sur design-tokens.css :
+   - une seule couleur d'accent (--color-accent) pour les actions
+   - --color-trust réservé au badge "Vérifié" (jamais confondu avec un CTA)
+   - --color-success / --color-danger réservés à la réputation détaillée,
+     uniquement dans la modale de détail (pas sur la liste)
+   - échelle typographique --text-xs → --text-xl, aucune taille arbitraire
+   ============================================================ */
+
+:host { display: block; font-family: var(--font-body); color: var(--color-ink); }
+
+/* ══ PAGE ══ */
+.art-page { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
+
+.art-header { margin-bottom: 22px; }
+.art-title { font-family: var(--font-display); font-size: var(--text-xl); font-weight: var(--weight-bold); letter-spacing: -.3px; margin: 0 0 6px; }
+.art-subtitle { font-size: var(--text-sm); color: var(--color-ink-muted); max-width: 600px; line-height: 1.55; margin: 0; }
+
+/* ══ FILTRES ══ */
+.art-filtres { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+@media (max-width: 768px) {
+  .art-filtres { flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
+  .art-filtres::-webkit-scrollbar { display: none; }
+}
+
+.art-chip {
+  padding: 8px 14px; border-radius: 999px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink-soft);
+  font-size: var(--text-xs); font-weight: var(--weight-medium); cursor: pointer;
+  transition: all .15s ease; white-space: nowrap; flex-shrink: 0;
+  font-family: var(--font-body);
+}
+.art-chip:hover { background: var(--color-surface-tint); border-color: var(--color-accent); color: var(--color-accent-strong); }
+/* Puce active = vert de marque (KaSa), texte blanc */
+.art-chip--actif,
+.art-chip--actif:hover { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.art-chip__ico { margin-right: 3px; }
+
+/* Puce « Tous les métiers » */
+.art-chip--tous { font-weight: var(--weight-bold); }
+
+.art-metier-ico { margin-right: 2px; }
+
+/* ══ COMPTEUR ══ */
+.art-compteur { font-size: var(--text-xs); color: var(--color-ink-muted); margin-bottom: 18px; font-weight: var(--weight-medium); }
+
+/* ══ GRILLE ══ */
+.art-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 18px; align-content: start;
+}
+
+/* ══ CARTE ══ */
+.art-carte {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 16px;
+  padding: 18px; box-shadow: var(--shadow-card-rest);
+  display: flex; flex-direction: column; gap: 12px;
+  min-width: 0; cursor: pointer;
+  transition: box-shadow .15s, transform .15s, border-color .15s;
+}
+.art-carte:hover { box-shadow: var(--shadow-card); transform: translateY(-1px); border-color: var(--color-border-strong); }
+
+/* ── Tête ── */
+.art-carte-head { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+
+.art-avatar {
+  width: 44px; height: 44px; border-radius: 12px;
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-weight: var(--weight-black); font-size: var(--text-md); flex-shrink: 0; letter-spacing: -.5px;
+}
+
+.art-carte-infos { flex: 1; min-width: 0; }
+
+.art-nom-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.art-nom { font-weight: var(--weight-bold); font-size: var(--text-md); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Vérifié = accent de confiance dédié (bleu-indigo), jamais le vert des actions */
+.art-verifie-badge {
+  font-size: var(--text-xs); font-weight: var(--weight-bold);
+  background: var(--color-trust-bg); color: var(--color-trust-strong);
+  border-radius: 20px; padding: 1px 8px; white-space: nowrap; flex-shrink: 0;
+}
+
+.art-specialite { font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-ink-soft); margin-top: 2px; }
+.art-metier-loc { font-size: var(--text-xs); color: var(--color-ink-muted); margin-top: 2px; }
+
+.art-statut {
+  font-size: var(--text-xs); font-weight: var(--weight-bold); padding: 4px 10px; border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+}
+.art-statut--dispo { background: var(--color-success-bg); color: var(--color-success); }
+.art-statut--indispo { background: var(--color-surface-tint); color: var(--color-ink-faint); }
+
+/* ── Note ── */
+.art-note-row { display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--color-ink-muted); flex-wrap: wrap; }
+.art-etoiles { display: flex; gap: 1px; color: var(--color-warning); flex-shrink: 0; }
+.art-note-val { font-weight: var(--weight-black); color: var(--color-ink); font-size: var(--text-sm); }
+.art-note-nb { color: var(--color-ink-muted); }
+.art-exp { margin-left: auto; font-size: var(--text-xs); background: var(--color-surface-tint); color: var(--color-ink-soft); padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+
+/* ── Points forts : ce qui distingue ce professionnel dans SON métier ──
+   Volontairement neutre (pas de couleur) : ce sont des faits, pas des alertes. */
+.art-points-forts {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 6px;
+}
+.art-points-forts li {
+  font-size: var(--text-xs); font-weight: var(--weight-medium);
+  color: var(--color-ink-soft); background: var(--color-surface-tint);
+  border: 1px solid var(--color-border);
+  border-radius: 8px; padding: 4px 9px;
+}
+
+/* ── Repère tarifaire ── */
+.art-prix-depart {
+  display: flex; align-items: baseline; gap: 6px;
+  font-size: var(--text-sm); color: var(--color-ink-muted);
+  padding-top: 10px; border-top: 1px solid var(--color-border);
+}
+.art-prix-depart strong { font-size: var(--text-md); font-weight: var(--weight-bold); color: var(--color-ink); }
+
+/* ── Actions carte ── */
+.art-actions { display: flex; gap: 8px; margin-top: auto; }
+
+.art-btn-profil {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 14px; border-radius: 10px;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface); color: var(--color-ink);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: var(--weight-medium); cursor: pointer;
+  transition: all .15s;
+}
+.art-btn-profil:hover { border-color: var(--color-ink); background: var(--color-surface-tint); }
+
+.art-btn-contact {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 10px 14px; border-radius: 10px; border: none;
+  background: var(--color-accent); color: var(--color-accent-ink);
+  font-family: var(--font-body); font-size: var(--text-sm); font-weight: var(--weight-bold); cursor: pointer;
+  transition: all .15s;
+}
+.art-btn-contact:hover { background: var(--color-accent-strong); }
+.art-btn-contact:disabled { background: var(--color-surface-tint); color: var(--color-ink-faint); cursor: not-allowed; }
+
+/* ── Vide ── */
+.art-vide { text-align: center; padding: 64px 0; color: var(--color-ink-muted); font-size: var(--text-base); }
+.art-vide-icone { font-size: 40px; margin-bottom: 12px; }
+
+/* ══ OVERLAY ══ */
+.art-overlay {
+  position: fixed; inset: 0; background: rgba(10,10,10,.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 1000; padding: 0;
+  animation: fadeIn .18s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 640px) { .art-overlay { align-items: center; padding: 16px; } }
+
+/* ══ MODAL BASE ══ */
+.art-modal {
+  background: var(--color-surface);
+  border-radius: 20px 20px 0 0; padding: 26px 22px 32px;
+  width: 100%; max-width: 480px;
+  box-shadow: var(--shadow-overlay);
+  position: relative; max-height: 96vh; overflow-y: auto;
+  animation: slideUp .22s ease;
+}
+@media (min-width: 640px) {
+  .art-modal { border-radius: 20px; }
+}
+@keyframes slideUp { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.art-modal--profil { max-width: 560px; }
+
+.art-modal-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: var(--color-surface-tint);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--color-ink-muted); transition: background .12s;
+}
+.art-modal-close:hover { background: var(--color-border); }
+
+/* ── Modal contact ── */
+.art-modal-head { display: flex; align-items: center; gap: 13px; margin-bottom: 20px; }
+.art-modal-title { font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--weight-bold); }
+.art-modal-sub { font-size: var(--text-sm); color: var(--color-ink-muted); margin-top: 2px; }
+.art-modal-label { display: flex; flex-direction: column; gap: 6px; font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-ink-soft); margin-bottom: 12px; }
+.art-modal-input { font-family: var(--font-body); font-size: var(--text-base); padding: 11px 13px; border-radius: 10px; border: 1.5px solid var(--color-border); background: var(--color-bg); color: var(--color-ink); outline: none; transition: border-color .15s; }
+.art-modal-input:focus { border-color: var(--color-accent); }
+.art-modal-note { font-size: var(--text-xs); color: var(--color-ink-muted); line-height: 1.55; margin: 4px 0 18px; }
+.art-modal-actions { display: flex; gap: 10px; }
+.art-modal-cancel, .art-modal-confirm { flex: 1; padding: 12px; border-radius: 11px; font-size: var(--text-base); font-weight: var(--weight-bold); cursor: pointer; border: 1.5px solid var(--color-border); font-family: var(--font-body); }
+.art-modal-cancel { background: var(--color-surface); color: var(--color-ink-soft); }
+.art-modal-confirm { background: var(--color-accent); color: var(--color-accent-ink); border-color: var(--color-accent); display: flex; align-items: center; justify-content: center; gap: 8px; }
+.art-modal-confirm:hover { background: var(--color-accent-strong); border-color: var(--color-accent-strong); }
+
+/* ══ MODAL PROFIL — le détail regroupe toute l'information ══ */
+.art-profil-hero { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
+.art-profil-av { width: 58px; height: 58px; border-radius: 16px; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: var(--weight-black); font-size: var(--text-lg); flex-shrink: 0; }
+.art-profil-hero-info { flex: 1; min-width: 0; }
+.art-profil-nom-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.art-profil-nom { font-size: var(--text-lg); font-weight: var(--weight-black); }
+.art-profil-specialite { font-size: var(--text-sm); color: var(--color-ink-soft); font-weight: var(--weight-medium); margin-bottom: 3px; }
+.art-profil-meta { font-size: var(--text-sm); color: var(--color-ink-muted); margin-bottom: 4px; }
+.art-profil-tel { font-size: var(--text-sm); color: var(--color-ink); font-weight: var(--weight-medium); margin-bottom: 6px; }
+.art-profil-statut { display: inline-block; }
+.art-profil-note-row { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+
+/* ── Faits clés : 3 chiffres essentiels, lisibles d'un coup d'œil ── */
+.art-profil-faits {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 6px;
+}
+.art-fait {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 12px 6px; text-align: center;
+  background: var(--color-surface-tint); border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+.art-fait-val {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--font-display); font-size: var(--text-score); font-weight: var(--weight-bold);
+  color: var(--color-ink); line-height: 1;
+}
+.art-fait-star { color: var(--color-accent); }
+.art-fait-lib { font-size: var(--text-xs); color: var(--color-ink-muted); font-weight: var(--weight-medium); }
+
+/* ── Points forts du profil : puces vertes « ✓ » bien lisibles ── */
+.art-points-forts--profil { margin-bottom: 16px; gap: 8px; }
+.art-points-forts--profil li {
+  font-size: var(--text-sm); font-weight: var(--weight-medium);
+  color: var(--color-accent-strong); background: var(--color-accent-bg);
+  border-color: transparent; border-radius: 999px; padding: 6px 12px 6px 26px;
+  position: relative;
+}
+.art-points-forts--profil li::before {
+  content: '✓'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  font-weight: var(--weight-black); color: var(--color-accent);
+}
+
+.art-profil-desc { font-size: var(--text-base); color: var(--color-ink-soft); line-height: 1.6; margin-bottom: 18px; }
+
+.art-profil-section-title {
+  font-size: var(--text-xs); font-weight: var(--weight-black); text-transform: uppercase; letter-spacing: .5px;
+  color: var(--color-ink-muted); margin: 18px 0 10px;
+}
+
+/* ── Réputation détaillée (uniquement dans la modale, pas sur la liste) ── */
+.art-rep-detail { display: flex; flex-direction: column; gap: 9px; margin-bottom: 4px; }
+.art-rep-detail-item { display: flex; align-items: center; gap: 10px; font-size: var(--text-sm); }
+.art-rep-detail-label { color: var(--color-ink-soft); width: 132px; flex-shrink: 0; }
+.art-rep-bar-bg { flex: 1; min-width: 60px; height: 6px; background: var(--color-border); border-radius: 999px; overflow: hidden; }
+.art-rep-bar { height: 100%; border-radius: 999px; background: var(--color-success); transition: width .5s ease; }
+.art-rep-bar--neg { background: var(--color-danger); }
+.art-rep-detail-pct { font-weight: var(--weight-bold); color: var(--color-success); font-size: var(--text-sm); width: 38px; text-align: right; flex-shrink: 0; }
+.art-rep-detail-pct--neg { color: var(--color-danger); }
+
+/* ── Profil prestations ── */
+.art-prestations { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.art-prestations li { display: flex; align-items: baseline; justify-content: space-between; font-size: var(--text-sm); gap: 8px; min-width: 0; }
+.art-prestations li span { color: var(--color-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
+.art-prestations li strong { color: var(--color-ink); white-space: nowrap; flex-shrink: 0; font-weight: var(--weight-bold); }
+.art-profil-prestations { border-top: 1px solid var(--color-border); margin-bottom: 4px; }
+.art-profil-prestations li { padding: 8px 0; border-bottom: 1px solid var(--color-border); }
+
+/* ── Avis liste ── */
+.art-avis-liste { display: flex; flex-direction: column; gap: 12px; margin-bottom: 8px; }
+.art-avis-item { background: var(--color-surface-tint); border-radius: 11px; padding: 12px 14px; }
+.art-avis-item-head { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
+.art-avis-av { width: 30px; height: 30px; border-radius: 50%; background: var(--color-ink); color: #fff; font-size: var(--text-xs); font-weight: var(--weight-black); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.art-avis-item-info { flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.art-avis-auteur { font-size: var(--text-sm); font-weight: var(--weight-bold); }
+.art-avis-date { font-size: var(--text-xs); color: var(--color-ink-muted); }
+.art-avis-etoiles { display: flex; gap: 1px; color: var(--color-warning); }
+.art-avis-texte { font-size: var(--text-sm); color: var(--color-ink-soft); font-style: italic; line-height: 1.5; margin: 0; }
+
+/* ── Actions profil ── */
+.art-profil-actions { display: flex; gap: 10px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--color-border); }
+.art-btn-profil--full, .art-btn-contact--full { flex: 1; padding: 13px; font-size: var(--text-base); }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 640px) {
+  .art-page { padding: 20px 14px 60px; }
+  .art-liste { grid-template-columns: 1fr; gap: 14px; }
+  .art-profil-hero { flex-direction: column; align-items: center; text-align: center; }
+  .art-profil-nom-row { justify-content: center; }
+  .art-rep-detail-label { width: 112px; }
+}
+@media (max-width: 360px) {
+  .art-page { padding: 16px 10px 48px; }
+}

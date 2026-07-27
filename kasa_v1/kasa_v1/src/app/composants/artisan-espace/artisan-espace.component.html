@@ -1,0 +1,276 @@
+<app-barre-navigation />
+
+<div class="ar-page" *ngIf="!chargementEnCours && artisan as a">
+  <a routerLink="/home" class="ar-retour">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+      <line x1="19" y1="12" x2="5" y2="12" />
+      <polyline points="12 19 5 12 12 5" />
+    </svg>
+    Retour
+  </a>
+
+  <!-- ── EN-TÊTE ── -->
+  <div class="ar-header">
+    <div class="ar-avatar" [style.background]="a.couleurAvatar">{{ a.initiales }}</div>
+    <div class="ar-header-info">
+      <div class="ar-name-row">
+        {{ a.nom }}
+        <span class="ar-verified" *ngIf="a.estVerifie" title="Vérifié">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </span>
+      </div>
+      <div class="ar-role-tag">{{ a.metier }} · {{ a.quartier }}</div>
+      <div class="ar-sub"><span class="ar-stars">★</span> {{ a.note }} ({{ a.nombreAvis }} avis)</div>
+    </div>
+    <div class="ar-header-actions">
+      <button class="ar-btn ar-btn--outline" type="button" (click)="ouvrirEditionProfil()">
+        Modifier le profil
+      </button>
+      <button
+        class="ar-dispo-toggle"
+        type="button"
+        [class.ar-dispo-toggle--on]="a.disponible"
+        (click)="basculerDisponibilite()"
+      >
+        <span class="ar-dispo-dot"></span>
+        {{ a.disponible ? 'Disponible' : 'Indisponible' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PROFIL INCOMPLET ── -->
+  <div class="ar-alerte" *ngIf="profilIncomplet && !profilEnEdition">
+    Votre profil n'est pas encore complet. Ajoutez une spécialité, une description et vos points forts pour
+    apparaître correctement dans la liste des artisans consultée par les locataires.
+    <button class="ar-btn ar-btn--text ar-alerte-action" type="button" (click)="ouvrirEditionProfil()">
+      Compléter maintenant
+    </button>
+  </div>
+
+  <!-- ── FORMULAIRE PROFIL ── -->
+  <div class="ar-section ar-section--profil" *ngIf="profilEnEdition">
+    <h2 class="ar-section-title">Modifier mon profil</h2>
+    <p class="ar-section-note">
+      Ces informations apparaissent exactement telles quelles dans la liste publique des artisans et dans le
+      détail affiché aux locataires. La note, les avis et le badge « Vérifié » sont gérés par KaSa et ne sont
+      pas modifiables ici.
+    </p>
+
+    <div class="ar-row-2">
+      <div class="ar-field">
+        <label class="ar-label">Nom complet</label>
+        <input class="ar-input" type="text" [(ngModel)]="formProfil.nom" name="nom" placeholder="Ex : Issouf Ouédraogo" />
+      </div>
+      <div class="ar-field">
+        <label class="ar-label">Métier</label>
+        <select class="ar-input" [(ngModel)]="formProfil.metier" name="metier">
+          <option *ngFor="let m of metiers" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="ar-field">
+      <label class="ar-label">Spécialité (sous-titre affiché sur votre carte)</label>
+      <input
+        class="ar-input"
+        type="text"
+        [(ngModel)]="formProfil.specialite"
+        name="specialite"
+        placeholder="Ex : Dépannage & installation électrique"
+      />
+    </div>
+
+    <div class="ar-field">
+      <label class="ar-label">Description de votre activité</label>
+      <textarea
+        class="ar-input ar-textarea"
+        [(ngModel)]="formProfil.description"
+        name="description"
+        rows="3"
+        placeholder="Présentez votre activité, votre matériel, vos garanties…"
+      ></textarea>
+    </div>
+
+    <div class="ar-field">
+      <label class="ar-label">Points forts (2-3 informations clés mises en avant sur votre carte)</label>
+      <div class="ar-tags">
+        <span class="ar-tag" *ngFor="let pt of formProfil.pointsForts; let i = index">
+          {{ pt }}
+          <button class="ar-tag-suppr" type="button" (click)="supprimerPointFort(i)" aria-label="Supprimer">×</button>
+        </span>
+      </div>
+      <div class="ar-tag-ajout">
+        <input
+          class="ar-input"
+          type="text"
+          [(ngModel)]="nouveauPointFort"
+          name="nouveauPointFort"
+          placeholder="Ex : Agréé SONABEL"
+          (keydown.enter)="$event.preventDefault(); ajouterPointFort()"
+        />
+        <button class="ar-btn ar-btn--outline" type="button" (click)="ajouterPointFort()">Ajouter</button>
+      </div>
+    </div>
+
+    <div class="ar-row-2">
+      <div class="ar-field">
+        <label class="ar-label">Années d'expérience</label>
+        <input class="ar-input" type="number" min="0" [(ngModel)]="formProfil.anneesExperience" name="anneesExperience" />
+      </div>
+      <div class="ar-field">
+        <label class="ar-label">Numéro WhatsApp</label>
+        <input class="ar-input" type="text" [(ngModel)]="formProfil.whatsapp" name="whatsapp" placeholder="+226 70 00 00 00" />
+      </div>
+    </div>
+
+    <div class="ar-row-2">
+      <div class="ar-field">
+        <label class="ar-label">Quartier</label>
+        <input class="ar-input" type="text" [(ngModel)]="formProfil.quartier" name="quartier" placeholder="Ex : Ouaga 2000" />
+      </div>
+      <div class="ar-field">
+        <label class="ar-label">Ville</label>
+        <input class="ar-input" type="text" [(ngModel)]="formProfil.ville" name="ville" placeholder="Ex : Ouagadougou" />
+      </div>
+    </div>
+
+    <div class="ar-field">
+      <label class="ar-label">Couleur d'avatar (si vous n'ajoutez pas de photo)</label>
+      <div class="ar-couleurs">
+        <button
+          *ngFor="let c of couleursAvatar"
+          type="button"
+          class="ar-couleur-swatch"
+          [class.ar-couleur-swatch--actif]="formProfil.couleurAvatar === c"
+          [style.background]="c"
+          (click)="formProfil.couleurAvatar = c"
+          [attr.aria-label]="c"
+        ></button>
+      </div>
+    </div>
+
+    <div class="ar-inline-form-actions">
+      <button class="ar-btn ar-btn--primary" type="button" [disabled]="!profilValide" (click)="enregistrerProfil()">
+        Enregistrer le profil
+      </button>
+      <button class="ar-btn ar-btn--text" type="button" (click)="annulerEditionProfil()">Annuler</button>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="ar-stats">
+    <div class="ar-stat">
+      <div class="ar-stat-val">{{ a.note }}<span class="ar-stat-suffixe">/5</span></div>
+      <div class="ar-stat-label">Note moyenne</div>
+    </div>
+    <div class="ar-stat">
+      <div class="ar-stat-val">{{ a.nombreAvis }}</div>
+      <div class="ar-stat-label">Avis reçus</div>
+    </div>
+    <div class="ar-stat">
+      <div class="ar-stat-val">{{ a.nombreInterventions }}</div>
+      <div class="ar-stat-label">Interventions</div>
+    </div>
+    <div class="ar-stat">
+      <div class="ar-stat-val">{{ demandesEnAttente.length }}</div>
+      <div class="ar-stat-label">Demandes en attente</div>
+    </div>
+  </div>
+
+  <!-- ── DEMANDES REÇUES ── -->
+  <div class="ar-section">
+    <h2 class="ar-section-title">Demandes reçues</h2>
+
+    <div class="ar-vide" *ngIf="!demandes.length">Aucune demande de mise en relation pour le moment.</div>
+
+    <div class="ar-demande" *ngFor="let d of demandesEnAttente">
+      <div class="ar-demande-top">
+        <span class="ar-demande-client">{{ d.nomClient }}</span>
+        <span class="ar-demande-date">{{ d.date }}</span>
+      </div>
+      <div class="ar-demande-besoin">{{ d.besoin }}</div>
+      <div class="ar-demande-position">{{ d.positionLibelle }}</div>
+      <div class="ar-demande-actions">
+        <a class="ar-btn ar-btn--primary" [href]="lienWhatsapp(d)" target="_blank" rel="noopener">
+          Répondre sur WhatsApp
+        </a>
+        <button class="ar-btn ar-btn--text" type="button" (click)="marquerTraitee(d.id)">
+          Marquer comme traitée
+        </button>
+      </div>
+    </div>
+
+    <ng-container *ngIf="demandesTraitees.length">
+      <div class="ar-demande ar-demande--traitee" *ngFor="let d of demandesTraitees">
+        <div class="ar-demande-top">
+          <span class="ar-demande-client">{{ d.nomClient }}</span>
+          <span class="ar-demande-statut">Traitée</span>
+        </div>
+        <div class="ar-demande-besoin">{{ d.besoin }}</div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ── PRESTATIONS ── -->
+  <div class="ar-section">
+    <div class="ar-section-header">
+      <h2 class="ar-section-title">Mes prestations</h2>
+      <button class="ar-btn ar-btn--outline" type="button" (click)="ouvrirAjoutPrestation()" *ngIf="!ajoutPrestationOuvert">
+        + Ajouter
+      </button>
+    </div>
+
+    <div class="ar-prestation" *ngFor="let p of a.prestations; let i = index">
+      <div class="ar-prestation-info">
+        <div class="ar-prestation-libelle">{{ p.libelle }}</div>
+        <div class="ar-prestation-meta">{{ p.typeTarification === 'forfait' ? 'Forfait' : 'Tarif horaire' }}</div>
+      </div>
+      <div class="ar-prestation-prix">{{ formaterPrix(p.prixReference, p.devise) }}</div>
+      <button class="ar-prestation-suppr" type="button" (click)="supprimerPrestation(i)" title="Supprimer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Formulaire : ajouter une prestation -->
+    <div class="ar-inline-form" *ngIf="ajoutPrestationOuvert">
+      <div class="ar-field">
+        <label class="ar-label">Libellé de la prestation</label>
+        <input class="ar-input" type="text" [(ngModel)]="nouveauLibelle" name="libelle" placeholder="Ex : Réparation fuite" />
+      </div>
+      <div class="ar-row-2">
+        <div class="ar-field">
+          <label class="ar-label">Prix de référence (FCFA)</label>
+          <input class="ar-input" type="number" [(ngModel)]="nouveauPrix" name="prix" min="0" />
+        </div>
+        <div class="ar-field">
+          <label class="ar-label">Type de tarification</label>
+          <select class="ar-input" [(ngModel)]="nouveauType" name="type">
+            <option value="forfait">Forfait</option>
+            <option value="horaire">Horaire</option>
+          </select>
+        </div>
+      </div>
+      <div class="ar-inline-form-actions">
+        <button class="ar-btn ar-btn--primary" type="button" (click)="validerNouvellePrestation()">Enregistrer</button>
+        <button class="ar-btn ar-btn--text" type="button" (click)="annulerAjoutPrestation()">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ar-loading" *ngIf="chargementEnCours">Chargement de votre espace artisan…</div>
+
+<div class="ar-introuvable" *ngIf="!chargementEnCours && artisanIntrouvable">
+  <p *ngIf="!estArtisan">
+    Cette page est réservée aux comptes artisan. Connectez-vous avec un compte artisan pour y accéder.
+  </p>
+  <p *ngIf="estArtisan">
+    Aucun profil artisan n'est encore rattaché à votre compte. Contactez KaSa pour finaliser votre inscription.
+  </p>
+  <a routerLink="/home">Retour à la recherche</a>
+</div>

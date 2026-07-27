@@ -1,0 +1,55 @@
+<app-barre-navigation />
+<app-barre-filtres />
+
+<!-- Tiroir mobile (depuis la carte) -->
+<app-tiroir-mobile
+  [logement]="logementTiroir"
+  (fermer)="fermerTiroir()"
+  (voirDetail)="ouvrirDetail($event)"
+>
+</app-tiroir-mobile>
+
+<!-- Page principale -->
+<div class="page-resultats">
+  <aside class="colonne-carte">
+    <app-map
+      [logements]="logements"
+      (logementSelectionne)="surMarqueurSelectionne($event)"
+    ></app-map>
+  </aside>
+
+  <section class="colonne-liste">
+    <header class="entete-liste">
+      <h1>Logements disponibles actuellement à Ouagadougou</h1>
+      <span class="compteur" *ngIf="!chargementEnCours"
+        >{{ logementsAffiches.length }} résultats</span
+      >
+    </header>
+
+    <p *ngIf="chargementEnCours" class="etat-chargement">Chargement des logements…</p>
+
+    <div class="grille-logements" *ngIf="!chargementEnCours">
+      <div
+        *ngFor="let logement of logementsAffiches"
+        [id]="'logement-' + logement.id"
+        (click)="ouvrirDetail(logement)"
+      >
+        <app-logement
+          [logement]="logement"
+          [estSurvole]="idLogementSurvole === logement.id"
+          [estEnregistre]="idsEnregistres.has(logement.id)"
+          (carteSurvolee)="surCarteSurvolee($event)"
+          (logementEnregistre)="surEnregistrer($event)"
+          (logementMasque)="surMasquer($event)"
+          (logementSignale)="surSignaler($event)"
+        ></app-logement>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Confirmation d'action (enregistrer / masquer / signaler) -->
+<div class="toast-action" *ngIf="messageToast">
+  <span>{{ messageToast }}</span>
+  <button type="button" *ngIf="toastAnnulable" (click)="annulerAction()">Annuler</button>
+</div>

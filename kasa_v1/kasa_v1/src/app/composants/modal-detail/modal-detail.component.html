@@ -1,0 +1,1970 @@
+<app-barre-navigation />
+
+<div class="kd-page-chargement" *ngIf="chargementEnCours">Chargement du logement…</div>
+
+<div class="kd-page-introuvable" *ngIf="logementIntrouvable">
+  <p>Ce logement n'existe pas ou n'est plus disponible.</p>
+  <a routerLink="/home">← Retour à la liste des logements</a>
+</div>
+
+<div class="kasa-detail" *ngIf="logement">
+  <div class="kd-popup-card">
+    <div class="kd-sticky-header" #stickyHeaderRef>
+      <!-- ── TOPBAR ── -->
+      <div class="kd-topbar">
+        <button class="kd-back-btn" (click)="retourALaRecherche()">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            width="14"
+            height="14"
+          >
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Retour
+        </button>
+
+        <div class="kd-topbar__sep"></div>
+        <div class="kd-topbar__actions">
+          <button class="kd-topbar__action" (click)="afficherToast('🔖 Logement enregistré')">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="13"
+              height="13"
+            >
+              <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+            </svg>
+            Enregistrer
+          </button>
+          <button class="kd-topbar__action" (click)="afficherToast('🔗 Lien copié')">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="13"
+              height="13"
+            >
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.6" y1="13.5" x2="15.4" y2="17.5" />
+              <line x1="15.4" y1="6.5" x2="8.6" y2="10.5" />
+            </svg>
+            Partager
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STICKY SECTION NAV ── -->
+      <nav class="section-nav" [class.section-nav--visible]="navVisible">
+        <a
+          class="section-nav__item"
+          [class.section-nav__item--actif]="ancreActive === 'galerie'"
+          (click)="allerASection('galerie')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="M21 15l-5-5L5 21" />
+          </svg>
+          Médias
+        </a>
+        <a
+          class="section-nav__item"
+          [class.section-nav__item--actif]="ancreActive === 'presentation'"
+          (click)="allerASection('presentation')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          Présentation
+        </a>
+        <a
+          class="section-nav__item"
+          [class.section-nav__item--actif]="ancreActive === 'services'"
+          (click)="allerASection('services')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          Eau &amp; Courant
+        </a>
+        <a
+          class="section-nav__item"
+          [class.section-nav__item--actif]="ancreActive === 'emplacement'"
+          (click)="allerASection('emplacement')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+            <circle cx="12" cy="9" r="2.5" />
+          </svg>
+          Emplacement
+        </a>
+        <a
+          class="section-nav__item"
+          *ngIf="logement.repartitionNotes || logement.avis?.length"
+          [class.section-nav__item--actif]="ancreActive === 'avis'"
+          (click)="allerASection('avis')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <polygon
+              points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3"
+            />
+          </svg>
+          Avis
+        </a>
+        <a
+          class="section-nav__item"
+          *ngIf="
+            (logement.historiquePrix && logement.historiquePrix.length > 0) ||
+            logement.historiqueBBV?.length
+          "
+          [class.section-nav__item--actif]="ancreActive === 'prix'"
+          (click)="allerASection('prix')"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="14"
+            height="14"
+          >
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+            <polyline points="17 6 23 6 23 12" />
+          </svg>
+          Historique prix
+        </a>
+      </nav>
+    </div>
+
+    <!-- ── CORPS ── -->
+    <div class="kd-corps" #corpsRef>
+      <div id="ancre-galerie"></div>
+      <!-- ── GALERIE ── -->
+      <div class="kd-galerie" #galerieRef (click)="cyclerGalerie()">
+        <img
+          class="kd-galerie__img"
+          [src]="logement.images[indexGalerie]"
+          [alt]="logement.titre || logement.typeBien"
+        />
+
+        <!-- Badge certification -->
+        <div class="kd-galerie__badge-bbv" [class.kd-badge--certifie]="logement.annonceCertifiee">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="12"
+            height="12"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          {{ logement.annonceCertifiee ? 'Annonce Vérifiée KaSa' : 'En cours de vérification' }}
+        </div>
+
+        <!-- Compteur visites -->
+        <div class="kd-galerie__visits" *ngIf="logement.nombreVisites">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            width="11"
+            height="11"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+          {{ logement.nombreVisites }} vues
+        </div>
+
+        <div class="kd-galerie__dots" (click)="$event.stopPropagation()">
+          <button
+            *ngFor="let img of logement.images; let i = index"
+            class="kd-galerie__dot"
+            [class.kd-galerie__dot--actif]="i === indexGalerie"
+            (click)="allerAGalerie($event, i)"
+            [attr.aria-label]="'Photo ' + (i + 1)"
+          ></button>
+        </div>
+
+        <div class="kd-galerie__actions" (click)="$event.stopPropagation()">
+          <button class="kd-gal-btn" (click)="ouvrirVueMedia($event, 'photos')">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <rect x="3" y="3" width="7" height="7" />
+              <rect x="14" y="3" width="7" height="7" />
+              <rect x="3" y="14" width="7" height="7" />
+              <rect x="14" y="14" width="7" height="7" />
+            </svg>
+            <span>Voir toutes les photos</span>
+          </button>
+          <button
+            class="kd-gal-btn"
+            *ngIf="logement.visite3D?.length"
+            (click)="ouvrirVueMedia($event, 'pano')"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+            </svg>
+            <span>Visite 3D</span>
+          </button>
+          <button
+            class="kd-gal-btn"
+            *ngIf="logement.videoDureeSecondes"
+            (click)="ouvrirVueMedia($event, 'video')"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            <span>Vidéo {{ dureeVideoFormatee }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="kd-page-body">
+        <!-- ════ COLONNE PRINCIPALE ════ -->
+        <div class="kd-main-col">
+          <!-- ── 1. EN-TÊTE PRIX + TRANSPARENCE ── -->
+          <div class="kd-price-header">
+            <div>
+              <div>{{ logement.prix.toLocaleString('fr-FR') }} <span> FCFA / mois</span></div>
+            </div>
+
+
+            <div class="kd-rating-badge" *ngIf="logement.hote.nombreAvis">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11">
+                <polygon
+                  points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3"
+                />
+              </svg>
+              {{ logement.hote.note }}
+              <span class="kd-rating-badge__reviews"
+                >· {{ logement.hote.nombreAvis }} avis vérifiés</span
+              >
+            </div>
+          </div>
+
+          <!-- ── 2. TRANSPARENCE TOTALE : méta annonce ── -->
+          <div class="kd-transparency-row">
+            <div class="kd-meta-pill" *ngIf="logement.dateCreation">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="11"
+                height="11"
+              >
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+              Publiée {{ logement.publieDepuis }}
+            </div>
+            <div class="kd-meta-pill" *ngIf="logement.nombreVisites">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="11"
+                height="11"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              {{ logement.nombreVisites }} visites
+            </div>
+            <div class="kd-meta-pill" *ngIf="logement.surface">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="11"
+                height="11"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+              </svg>
+              {{ logement.surface.valeurM2 }} m²
+            </div>
+          </div>
+
+          <!-- Commission KaSa (25%) — affichée une seule fois dans le récapitulatif financier -->
+
+
+          <div class="kd-listing-subtitle">
+            {{ logement.quartier }} · {{ logement.typeBien }}
+            <ng-container *ngIf="logement.nombreChambres">
+              · {{ logement.nombreChambres }} chambres</ng-container
+            >
+          </div>
+
+          <div class="kd-listing-meta">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="11"
+              height="11"
+            >
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+              <circle cx="12" cy="9" r="2.5" />
+            </svg>
+            {{ formaterDistance(logement.distanceKm) }} de vous
+            <ng-container *ngIf="logement.lieuxProximite?.length">
+              ·
+              <span class="kd-proximite-hint"
+                >{{ logement.lieuxProximite![0].tempsTrajetMinutes }} min de
+                {{ logement.lieuxProximite![0].libelle }}</span
+              >
+            </ng-container>
+          </div>
+
+          <!-- ── INTERLOCUTEUR : bailleur autonome, représenté par un agent, ou profil non renseigné ── -->
+          <div
+            class="kd-bailleur-notice"
+            *ngIf="bailleurEstRepresente || bailleurNonVerifie"
+            [class.kd-bailleur-notice--non-verifie]="bailleurNonVerifie"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="14"
+              height="14"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>{{ messageStatutBailleur }}</span>
+          </div>
+
+          <div class="kd-agent-row">
+            <a
+              class="kd-avatar"
+              [routerLink]="lienInterlocuteur"
+              [style.background]="
+                (contactViaAgent ? null : logement.hote.photoUrl) ? 'transparent' : '#9C9690'
+              "
+            >
+              <img
+                *ngIf="!contactViaAgent && logement.hote.photoUrl"
+                [src]="logement.hote.photoUrl"
+                [alt]="logement.hote.nom"
+              />
+              <ng-container *ngIf="contactViaAgent || !logement.hote.photoUrl">{{
+                interlocuteurPrincipalInitiales
+              }}</ng-container>
+            </a>
+            <div class="kd-agent-info">
+              <div class="kd-agent-name-row">
+                <a class="kd-agent-nom-lien" [routerLink]="lienInterlocuteur">{{
+                  interlocuteurPrincipalNom
+                }}</a>
+
+                <!-- Bailleur autonome : ses propres badges -->
+                <ng-container *ngIf="bailleurEstAutonome">
+                  <span class="kd-verified" *ngIf="logement.hote.estVerifie">
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </span>
+                  <span class="kd-confiance-badge" *ngIf="logement.hote.niveauConfiance">
+                    Niveau {{ logement.hote.niveauConfiance }}/5
+                  </span>
+                </ng-container>
+
+                <!-- Représenté ou profil non renseigné : dans les deux cas, c'est l'agent (vérifié) qui est l'interlocuteur -->
+                <span class="kd-role-badge" *ngIf="contactViaAgent">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  Agent terrain vérifié
+                </span>
+              </div>
+
+
+
+              <div class="kd-agent-sub" *ngIf="bailleurEstAutonome">
+                <span class="kd-stars">★</span>
+                {{ logement.hote.note }} ({{ logement.hote.nombreAvis }} avis)
+                <ng-container *ngIf="logement.hote.membreDepuis">
+                  · Membre depuis {{ logement.hote.membreDepuis }}</ng-container
+                >
+              </div>
+
+              <div class="kd-agent-sub" *ngIf="contactViaAgent && logement.noteAgent">
+                <span class="kd-stars">★</span>
+                {{ logement.noteAgent.moyenne }} · {{ logement.noteAgent.nombreVisites }} visites
+                accompagnées
+              </div>
+            </div>
+            <button class="kd-contact-btn" (click)="afficherToast('📞 Mise en relation en cours…')">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="13"
+                height="13"
+              >
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.8 19.8 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.68 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.32 1.85.55 2.81.68A2 2 0 0 1 22 16.92z"
+                />
+              </svg>
+              {{ contactViaAgent ? "Contacter l'agent" : 'Contacter' }}
+            </button>
+          </div>
+
+          <!-- ── NOTE PROPRIÉTAIRE ── -->
+          <div
+            class="kd-section kd-section--reputation"
+            *ngIf="logement.noteProprietaire && !bailleurNonVerifie"
+          >
+            <div
+              class="kd-section__header"
+              [class.kd-section__header--ouvert]="estSectionOuverte('noteProprietaire')"
+              (click)="basculerSection('noteProprietaire')"
+            >
+              <svg
+                class="kd-section__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="14"
+                height="14"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+              Réputation du propriétaire
+              <span class="kd-section__note-avg">{{ logement.noteProprietaire.moyenne }}/5</span>
+              <svg
+                class="kd-section__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="11"
+                height="11"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="kd-section__body" *ngIf="estSectionOuverte('noteProprietaire')">
+              <div class="kd-note-grid">
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Respect des conditions</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteProprietaire.respectConditions / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{ logement.noteProprietaire.respectConditions }}</span>
+                </div>
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Disponibilité du logement</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteProprietaire.disponibiliteLogement / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{
+                    logement.noteProprietaire.disponibiliteLogement
+                  }}</span>
+                </div>
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Honnêteté des informations</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteProprietaire.honneteteInfos / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{ logement.noteProprietaire.honneteteInfos }}</span>
+                </div>
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Réactivité</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteProprietaire.reactivite / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{ logement.noteProprietaire.reactivite }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── NOTE AGENT TERRAIN ── -->
+          <div class="kd-section kd-section--agent" *ngIf="logement.noteAgent">
+            <div
+              class="kd-section__header"
+              [class.kd-section__header--ouvert]="estSectionOuverte('noteAgent')"
+              (click)="basculerSection('noteAgent')"
+            >
+              <svg
+                class="kd-section__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="14"
+                height="14"
+              >
+                <rect x="2" y="7" width="20" height="14" rx="2" />
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+              </svg>
+              Agent terrain
+              <span class="kd-section__note-avg">{{ logement.noteAgent.moyenne }}/5</span>
+              <ng-container *ngIf="logement.noteAgent.nomAgent">
+                <span class="kd-section__agent-name">{{ logement.noteAgent.nomAgent }}</span>
+              </ng-container>
+              <svg
+                class="kd-section__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="11"
+                height="11"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="kd-section__body" *ngIf="estSectionOuverte('noteAgent')">
+              <div class="kd-agent-terrain-header" *ngIf="logement.noteAgent.nomAgent">
+                <div class="kd-avatar kd-avatar--sm">{{ logement.noteAgent.initialesAgent }}</div>
+                <div>
+                  <div class="kd-agent-terrain-nom">{{ logement.noteAgent.nomAgent }}</div>
+                  <div class="kd-agent-terrain-sub">
+                    {{ logement.noteAgent.nombreVisites }} visites accompagnées
+                  </div>
+                </div>
+                <button class="kd-reserver-visite-btn" (click)="reserverVisite()">
+                  📅 Réserver une visite
+                </button>
+              </div>
+              <div class="kd-note-grid">
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Qualité accompagnement</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteAgent.qualiteAccompagnement / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{ logement.noteAgent.qualiteAccompagnement }}</span>
+                </div>
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Ponctualité</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteAgent.ponctualite / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{ logement.noteAgent.ponctualite }}</span>
+                </div>
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Exactitude des informations</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteAgent.exactitudeInfos / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{ logement.noteAgent.exactitudeInfos }}</span>
+                </div>
+                <div class="kd-note-item">
+                  <span class="kd-note-label">Comportement professionnel</span>
+                  <div class="kd-note-bar">
+                    <div
+                      class="kd-note-fill"
+                      [style.width.%]="(logement.noteAgent.comportementProfessionnel / 5) * 100"
+                    ></div>
+                  </div>
+                  <span class="kd-note-val">{{
+                    logement.noteAgent.comportementProfessionnel
+                  }}</span>
+                </div>
+              </div>
+              <div class="kd-frais-carburant-note">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="12"
+                  height="12"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                Frais de carburant : contribution volontaire (non obligatoires)
+              </div>
+            </div>
+          </div>
+
+                    <div class="kd-commission-row" *ngIf="logement.commissionKasa">
+            <div class="kd-commission-label">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="12"
+                height="12"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              Commission agent du terrain est 5000 FCFA
+            </div>
+
+          </div>
+
+          <div id="ancre-presentation"></div>
+
+          <!-- ── DESCRIPTION ── -->
+          <div class="kd-section">
+            <div
+              class="kd-section__header"
+              [class.kd-section__header--ouvert]="estSectionOuverte('description')"
+              (click)="basculerSection('description')"
+            >
+              <svg
+                class="kd-section__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="14"
+                height="14"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Description
+              <svg
+                class="kd-section__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="11"
+                height="11"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="kd-section__body" *ngIf="estSectionOuverte('description')">
+              <p class="kd-description-text">{{ logement.description }}</p>
+              <!-- Conditions de location : affichées uniquement dans le récapitulatif financier à droite -->
+              <button
+                class="kd-voir-plus"
+                [class.kd-voir-plus--ouvert]="descriptionEtendue"
+                (click)="basculerDescription()"
+              >
+                {{ descriptionEtendue ? 'Voir moins' : 'Voir plus' }}
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  width="10"
+                  height="10"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- ── ÉQUIPEMENTS ── -->
+          <div class="kd-section">
+            <div
+              class="kd-section__header"
+              [class.kd-section__header--ouvert]="estSectionOuverte('equipements')"
+              (click)="basculerSection('equipements')"
+            >
+              <svg
+                class="kd-section__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="14"
+                height="14"
+              >
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+              </svg>
+              Ce que vous trouverez
+              <svg
+                class="kd-section__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="11"
+                height="11"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="kd-section__body" *ngIf="estSectionOuverte('equipements')">
+              <div class="kd-equip-grid">
+                <div class="kd-equip-item" *ngFor="let eq of logement.equipements">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.6"
+                    width="12"
+                    height="12"
+                  >
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                  {{ eq }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="ancre-services"></div>
+
+          <!-- ── 1. CERTIFICATION EAU ── -->
+          <div class="kd-section kd-section--service" *ngIf="logement.infoEau">
+            <div
+              class="kd-section__header"
+              [class.kd-section__header--ouvert]="estSectionOuverte('eau')"
+              (click)="basculerSection('eau')"
+            >
+              <svg
+                class="kd-section__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="14"
+                height="14"
+              >
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+              </svg>
+              Eau
+              <span
+                class="kd-service-badge"
+                [class.kd-service-badge--ok]="logement.infoEau.disponibilite === 'oui'"
+                [class.kd-service-badge--warn]="logement.infoEau.disponibilite === 'intermittent'"
+                [class.kd-service-badge--ko]="logement.infoEau.disponibilite === 'non'"
+              >
+                {{
+                  logement.infoEau.disponibilite === 'oui'
+                    ? 'Disponible'
+                    : logement.infoEau.disponibilite === 'intermittent'
+                      ? 'Intermittent'
+                      : 'Non disponible'
+                }}
+              </span>
+              <svg
+                class="kd-section__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="11"
+                height="11"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="kd-section__body" *ngIf="estSectionOuverte('eau')">
+              <div class="kd-service-grid">
+                <div class="kd-service-row">
+                  <span class="kd-service-label">Type de compteur</span>
+                  <span class="kd-service-val">{{
+                    logement.infoEau.typeCompteur === 'individuel' ? 'Individuel ✓' : 'Partagé'
+                  }}</span>
+                </div>
+                <div class="kd-service-row" *ngIf="logement.infoEau.frequenceCoupures">
+                  <span class="kd-service-label">Coupures (anciens loc.)</span>
+                  <span
+                    class="kd-service-val kd-service-val--freq-{{
+                      logement.infoEau.frequenceCoupures
+                    }}"
+                    >{{ logement.infoEau.frequenceCoupures | titlecase }}</span
+                  >
+                </div>
+                <div class="kd-service-row" *ngIf="logement.infoEau.coupuresDetail">
+                  <span class="kd-service-label">Détail</span>
+                  <span class="kd-service-val kd-service-val--sm">{{
+                    logement.infoEau.coupuresDetail
+                  }}</span>
+                </div>
+              </div>
+              <!-- Facture ONEA -->
+              <div class="kd-facture-mini" *ngIf="logement.infoEau.derniereFactureUrl">
+                <img
+                  class="kd-facture-mini__img"
+                  [src]="logement.infoEau.derniereFactureUrl"
+                  alt="Facture ONEA"
+                />
+                <div>
+                  <div class="kd-facture-mini__label">Facture ONEA</div>
+                  <div class="kd-facture-mini__statut">
+                    {{ logement.infoEau.derniereFactureStatut }}
+                  </div>
+                  <div
+                    class="kd-facture-mini__date"
+                    *ngIf="logement.infoEau.dernierePaiementDate"
+                  >
+                    Dernier paiement le {{ formaterDate(logement.infoEau.dernierePaiementDate) }}
+                  </div>
+                </div>
+                <div class="kd-badge-ajour">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  À jour
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── 1. CERTIFICATION ÉLECTRICITÉ ── -->
+          <div class="kd-section kd-section--service" *ngIf="logement.infoElectricite">
+            <div
+              class="kd-section__header"
+              [class.kd-section__header--ouvert]="estSectionOuverte('elec')"
+              (click)="basculerSection('elec')"
+            >
+              <svg
+                class="kd-section__icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="14"
+                height="14"
+              >
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+              </svg>
+              Électricité
+              <span
+                class="kd-service-badge"
+                [class.kd-service-badge--ok]="logement.infoElectricite.disponibilite === 'oui'"
+                [class.kd-service-badge--warn]="
+                  logement.infoElectricite.disponibilite === 'intermittent'
+                "
+                [class.kd-service-badge--ko]="logement.infoElectricite.disponibilite === 'non'"
+              >
+                {{
+                  logement.infoElectricite.disponibilite === 'oui'
+                    ? 'Disponible'
+                    : logement.infoElectricite.disponibilite === 'intermittent'
+                      ? 'Intermittent'
+                      : 'Non disponible'
+                }}
+              </span>
+              <span class="kd-cashpower-tag" *ngIf="logement.infoElectricite.estCashPower"
+                >Cash Power</span
+              >
+              <svg
+                class="kd-section__chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="11"
+                height="11"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+            <div class="kd-section__body" *ngIf="estSectionOuverte('elec')">
+              <div class="kd-service-grid">
+                <div class="kd-service-row">
+                  <span class="kd-service-label">Type de compteur</span>
+                  <span class="kd-service-val">{{
+                    logement.infoElectricite.typeCompteur === 'individuel'
+                      ? 'Individuel ✓'
+                      : 'Partagé'
+                  }}</span>
+                </div>
+                <div class="kd-service-row">
+                  <span class="kd-service-label">Système</span>
+                  <span class="kd-service-val">{{
+                    logement.infoElectricite.estCashPower
+                      ? 'Cash Power (prépayé)'
+                      : 'SONABEL classique'
+                  }}</span>
+                </div>
+                <!-- Cash Power : montant redevances obligatoire -->
+                <div
+                  class="kd-service-row"
+                  *ngIf="
+                    logement.infoElectricite.estCashPower &&
+                    logement.infoElectricite.montantRedevancesMensuels
+                  "
+                >
+                  <span class="kd-service-label">Redevances mensuelles</span>
+                  <span class="kd-service-val kd-service-val--prix"
+                    >{{
+                      logement.infoElectricite.montantRedevancesMensuels.toLocaleString('fr-FR')
+                    }}
+                    FCFA</span
+                  >
+                </div>
+                <div class="kd-service-row" *ngIf="logement.infoElectricite.frequenceCoupures">
+                  <span class="kd-service-label">Coupures (anciens loc.)</span>
+                  <span
+                    class="kd-service-val kd-service-val--freq-{{
+                      logement.infoElectricite.frequenceCoupures
+                    }}"
+                    >{{ logement.infoElectricite.frequenceCoupures | titlecase }}</span
+                  >
+                </div>
+              </div>
+              <!-- Facture SONABEL (si non Cash Power) -->
+              <div
+                class="kd-facture-mini"
+                *ngIf="
+                  !logement.infoElectricite.estCashPower &&
+                  logement.infoElectricite.derniereFactureUrl
+                "
+              >
+                <img
+                  class="kd-facture-mini__img"
+                  [src]="logement.infoElectricite.derniereFactureUrl"
+                  alt="Facture SONABEL"
+                />
+                <div>
+                  <div class="kd-facture-mini__label">Facture SONABEL</div>
+                  <div class="kd-facture-mini__statut">
+                    {{ logement.infoElectricite.derniereFactureStatut }}
+                  </div>
+                  <div
+                    class="kd-facture-mini__date"
+                    *ngIf="logement.infoElectricite.derniereFactureDate"
+                  >
+                    Dernière facture le
+                    {{ formaterDate(logement.infoElectricite.derniereFactureDate) }}
+                  </div>
+                </div>
+                <div class="kd-badge-ajour">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="10" height="10">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg>
+                  À jour
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── BBV Vérification ── -->
+          <div class="kd-bbv-section" *ngIf="logement.verifications?.length">
+            <div class="kd-check-list">
+              <ng-container *ngFor="let v of logement.verifications">
+                <!-- Masquer : Visite physique agent et GPS exact (point 6) -->
+                <div
+                  class="kd-check-item"
+                  *ngIf="
+                    !v.libelle.toLowerCase().includes('visite physique') &&
+                    !v.libelle.toLowerCase().includes('gps')
+                  "
+                >
+                  <div class="kd-check-left">
+                    <svg
+                      viewBox="0 0 24 24"
+                      [attr.fill]="v.validee ? 'currentColor' : 'none'"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      width="13"
+                      height="13"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                    <span class="kd-check-label">{{ v.libelle }}</span>
+                  </div>
+                  <div class="kd-check-value" [class.kd-check-value--vert]="v.validee">
+                    {{ v.detail }}
+                  </div>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+
+
+          <!-- ── EMPLACEMENT ── -->
+          <div class="kd-map-section">
+            <div class="kd-map-section__header">
+              <div class="kd-map-section__title">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="14"
+                  height="14"
+                >
+                  <path
+                    d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"
+                  />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+                Emplacement
+              </div>
+              <button class="kd-map-expand-btn" (click)="ouvrirVueMedia($event, 'carte')">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="11"
+                  height="11"
+                >
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
+                Agrandir la carte
+              </button>
+            </div>
+            <div class="kd-map-address-row">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                width="11"
+                height="11"
+              >
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                <circle cx="12" cy="9" r="2.5" />
+              </svg>
+              <span
+                ><strong>{{
+                  logement.adresse || logement.quartier + ', ' + logement.ville
+                }}</strong>
+                · {{ formaterDistance(logement.distanceKm) }} de vous</span
+              >
+            </div>
+            <div class="kd-map-container" (click)="ouvrirVueMedia($event, 'carte')">
+              <app-map
+                [logements]="[logement]"
+                [centre]="{ latitude: logement.latitude, longitude: logement.longitude }"
+                [zoom]="14"
+              ></app-map>
+              <div class="kd-map-overlay-click">
+                <button class="kd-map-open-btn" (click)="ouvrirVueMedia($event, 'carte')">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="12"
+                    height="12"
+                  >
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                  </svg>
+                  Voir en grand
+                </button>
+              </div>
+            </div>
+
+            <!-- Points proches -->
+            <div class="kd-map-pins-row" *ngIf="logement.pointsProches?.length">
+              <span class="kd-map-pin-tag" *ngFor="let p of logement.pointsProches"
+                >{{ p.icone }} {{ p.label }}</span
+              >
+            </div>
+
+            <!-- ── 4. PROXIMITÉ : lieux renseignés par le locataire ── -->
+            <div class="kd-proximite-section" *ngIf="logement.lieuxProximite?.length">
+              <div class="kd-proximite-title">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="12"
+                  height="12"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Temps de trajet
+              </div>
+              <div class="kd-proximite-list">
+                <div class="kd-proximite-item" *ngFor="let lieu of logement.lieuxProximite">
+                  <div class="kd-proximite-lieu">
+                    <span class="kd-proximite-categorie-icon">
+                      <ng-container [ngSwitch]="lieu.categorie">
+                        <ng-container *ngSwitchCase="'travail'">💼</ng-container>
+                        <ng-container *ngSwitchCase="'ecole'">🏫</ng-container>
+                        <ng-container *ngSwitchCase="'marche'">🛒</ng-container>
+                        <ng-container *ngSwitchCase="'hopital'">🏥</ng-container>
+                        <ng-container *ngSwitchDefault>📍</ng-container>
+                      </ng-container>
+                    </span>
+                    {{ lieu.libelle }}
+                  </div>
+                  <div class="kd-proximite-trajet">
+                    <strong>{{ lieu.tempsTrajetMinutes }} min</strong>
+                    <span class="kd-proximite-km">· {{ lieu.distanceKm }} km</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="ancre-avis"></div>
+
+          <!-- ── 3. AVIS ANCIENS LOCATAIRES ── -->
+          <div
+            class="kd-reviews-section"
+            *ngIf="logement.repartitionNotes || logement.avis?.length"
+          >
+            <div class="kd-reviews-header">
+              <div class="kd-reviews-header-top">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="14"
+                  height="14"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span class="kd-reviews-title">Avis anciens locataires</span>
+              </div>
+            </div>
+
+            <div class="kd-reviews-summary" *ngIf="logement.repartitionNotes">
+              <div class="kd-reviews-big-score">{{ logement.hote.note }}</div>
+              <div class="kd-reviews-summary-right">
+                <div class="kd-reviews-stars">★★★★★</div>
+                <div class="kd-reviews-count">{{ totalAvis }} vérifications</div>
+              </div>
+              <div class="kd-reviews-bar-list">
+                <div class="kd-reviews-bar-row" *ngFor="let n of [5, 4, 3, 2, 1]">
+                  <span class="kd-reviews-bar-label">{{ n }}★</span>
+                  <div class="kd-reviews-bar-track">
+                    <div class="kd-reviews-bar-fill" [style.width.%]="pourcentageNote[n]"></div>
+                  </div>
+                  <span class="kd-reviews-bar-count">{{ logement.repartitionNotes![n] }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="kd-review-list" *ngIf="avisVisibles.length; else aucunAvis">
+              <div class="kd-review-item" *ngFor="let a of avisVisibles">
+                <div class="kd-review-avatar">{{ a.initiales }}</div>
+                <div class="kd-review-body">
+                  <div class="kd-review-top">
+                    <span class="kd-review-name">{{ a.auteur }}</span>
+                    <span class="kd-review-date">{{ a.date }}</span>
+                  </div>
+                  <div class="kd-review-stars">
+                    <ng-container *ngFor="let i of [0, 1, 2, 3, 4]">
+                      <svg
+                        viewBox="0 0 24 24"
+                        [attr.fill]="i < a.note ? 'currentColor' : 'none'"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        width="10"
+                        height="10"
+                      >
+                        <polygon
+                          points="12 2 15.1 8.3 22 9.3 17 14.1 18.2 21 12 17.8 5.8 21 7 14.1 2 9.3 8.9 8.3"
+                        />
+                      </svg>
+                    </ng-container>
+                  </div>
+                  <!-- Notes thématiques obligatoires après départ -->
+                  <div
+                    class="kd-review-themes"
+                    *ngIf="
+                      a.noteEau ||
+                      a.noteCourant ||
+                      a.noteSecurity ||
+                      a.noteBailleur ||
+                      a.noteVoisinage ||
+                      a.noteProprete
+                    "
+                  >
+                    <span class="kd-theme-badge" *ngIf="a.noteEau">💧 Eau {{ a.noteEau }}/5</span>
+                    <span class="kd-theme-badge" *ngIf="a.noteCourant"
+                      >⚡ Courant {{ a.noteCourant }}/5</span
+                    >
+                    <span class="kd-theme-badge" *ngIf="a.noteSecurity"
+                      >🔒 Sécurité {{ a.noteSecurity }}/5</span
+                    >
+                    <span class="kd-theme-badge" *ngIf="a.noteBailleur"
+                      >🤝 Bailleur {{ a.noteBailleur }}/5</span
+                    >
+                    <span class="kd-theme-badge" *ngIf="a.noteVoisinage"
+                      >🏘️ Voisinage {{ a.noteVoisinage }}/5</span
+                    >
+                    <span class="kd-theme-badge" *ngIf="a.noteProprete"
+                      >🧹 Propreté {{ a.noteProprete }}/5</span
+                    >
+                  </div>
+                  <p class="kd-review-text">{{ a.commentaire }}</p>
+                </div>
+              </div>
+            </div>
+            <ng-template #aucunAvis>
+              <div class="kd-review-vide">
+                Aucun commentaire détaillé pour le moment, mais ce logement est déjà noté
+                {{ logement.hote.note }}/5 par ses précédents locataires.
+              </div>
+            </ng-template>
+
+            <button class="kd-reviews-voir-plus" *ngIf="aDesAvisCaches" (click)="basculerAvis()">
+              {{
+                avisEtendus
+                  ? 'Voir moins'
+                  : 'Voir tous les avis (' + (logement.avis?.length ?? 0) + ')'
+              }}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                width="10"
+                height="10"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+
+            <!-- ── Formulaire : Laisser un avis ── -->
+            <!-- Formulaire avis — visible uniquement si connecté -->
+            <div class="kd-avis-form" *ngIf="auth.estConnecte(); else avisNonConnecte">
+              <div class="kd-avis-form__title">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="14"
+                  height="14"
+                >
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Laisser un avis
+              </div>
+              <p class="kd-avis-form__subtitle">
+                Vous avez habité dans ce logement ? Partagez votre expérience pour aider la
+                communauté.
+              </p>
+
+              <!-- Notes thématiques -->
+              <div class="kd-avis-form__notes-grid">
+                <div class="kd-avis-form__note-item">
+                  <span class="kd-avis-form__note-label">💧 Eau</span>
+                  <div class="kd-avis-form__stars">
+                    <button
+                      *ngFor="let i of [1, 2, 3, 4, 5]"
+                      class="kd-avis-star"
+                      [class.kd-avis-star--on]="noteFormEau >= i"
+                      (click)="noteFormEau = i"
+                      type="button"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+                <div class="kd-avis-form__note-item">
+                  <span class="kd-avis-form__note-label">⚡ Courant</span>
+                  <div class="kd-avis-form__stars">
+                    <button
+                      *ngFor="let i of [1, 2, 3, 4, 5]"
+                      class="kd-avis-star"
+                      [class.kd-avis-star--on]="noteFormCourant >= i"
+                      (click)="noteFormCourant = i"
+                      type="button"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+                <div class="kd-avis-form__note-item">
+                  <span class="kd-avis-form__note-label">🔒 Sécurité</span>
+                  <div class="kd-avis-form__stars">
+                    <button
+                      *ngFor="let i of [1, 2, 3, 4, 5]"
+                      class="kd-avis-star"
+                      [class.kd-avis-star--on]="noteFormSecurite >= i"
+                      (click)="noteFormSecurite = i"
+                      type="button"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+                <div class="kd-avis-form__note-item">
+                  <span class="kd-avis-form__note-label">🤝 Bailleur</span>
+                  <div class="kd-avis-form__stars">
+                    <button
+                      *ngFor="let i of [1, 2, 3, 4, 5]"
+                      class="kd-avis-star"
+                      [class.kd-avis-star--on]="noteFormBailleur >= i"
+                      (click)="noteFormBailleur = i"
+                      type="button"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+                <div class="kd-avis-form__note-item">
+                  <span class="kd-avis-form__note-label">🏘️ Voisinage</span>
+                  <div class="kd-avis-form__stars">
+                    <button
+                      *ngFor="let i of [1, 2, 3, 4, 5]"
+                      class="kd-avis-star"
+                      [class.kd-avis-star--on]="noteFormVoisinage >= i"
+                      (click)="noteFormVoisinage = i"
+                      type="button"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+                <div class="kd-avis-form__note-item">
+                  <span class="kd-avis-form__note-label">🧹 Propreté</span>
+                  <div class="kd-avis-form__stars">
+                    <button
+                      *ngFor="let i of [1, 2, 3, 4, 5]"
+                      class="kd-avis-star"
+                      [class.kd-avis-star--on]="noteFormProprete >= i"
+                      (click)="noteFormProprete = i"
+                      type="button"
+                    >
+                      ★
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Commentaire libre -->
+              <textarea
+                class="kd-avis-form__textarea"
+                [(ngModel)]="commentaireAvis"
+                placeholder="Décrivez votre expérience : ambiance du quartier, relation avec le bailleur, état du logement à l'entrée…"
+                rows="4"
+                maxlength="800"
+              ></textarea>
+              <div class="kd-avis-form__footer">
+                <span class="kd-avis-form__char-count">{{ commentaireAvis.length }}/800</span>
+                <button
+                  class="kd-avis-form__submit"
+                  (click)="soumettreAvis()"
+                  [disabled]="!commentaireAvis.trim()"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="13"
+                    height="13"
+                  >
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                  Envoyer mon avis
+                </button>
+              </div>
+            </div>
+
+            <!-- Non connecté : invite à se connecter pour laisser un avis -->
+            <ng-template #avisNonConnecte>
+              <div class="kd-avis-gate">
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M4 20C4 16.5 7.5 14 12 14C16.5 14 20 16.5 20 20" />
+                </svg>
+                <p class="kd-avis-gate__title">Partagez votre expérience</p>
+                <p class="kd-avis-gate__sub">
+                  Vous avez habité dans ce logement ? Connectez-vous pour laisser un avis et aider
+                  la communauté KaSa.
+                </p>
+                <button class="kd-avis-gate__btn" (click)="auth.ouvrirModal('connexion')">
+                  Se connecter pour laisser un avis
+                </button>
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- ── 2. HISTORIQUE DES PRIX ── -->
+          <!-- ── 5. ÉVOLUTION DU LOYER & DU SCORE DE CONFIANCE ── -->
+          <div
+            *ngIf="
+              (logement.historiquePrix && logement.historiquePrix.length > 0) ||
+              logement.historiqueBBV?.length
+            "
+            id="ancre-prix"
+          >
+            <app-evolution-loyer-confiance
+              [historiquePrix]="logement.historiquePrix || []"
+              [historiqueBBV]="logement.historiqueBBV || []"
+              [devise]="logement.devise"
+            ></app-evolution-loyer-confiance>
+          </div>
+        </div>
+
+        <!-- ════ SIDEBAR ════ -->
+        <div class="kd-sidebar">
+          <div class="kd-sidebar-card">
+            <!-- Prix affiché uniquement dans l'en-tête principal, pas répété ici -->
+            <div class="kd-sidebar-summary-title">Détail financier</div>
+            <div class="kd-sidebar-summary">
+              <div class="kd-summary-row">
+                <span class="kd-summary-label">Caution (séquestre)</span>
+                <span class="kd-summary-val">{{ caution.toLocaleString('fr-FR') }}</span>
+              </div>
+              <div class="kd-caution-epargne-teaser">
+                Bientôt, votre caution pourra aussi être placée et fructifier.
+              </div>
+              <div class="kd-summary-row">
+                <span class="kd-summary-label">Avance 3 mois</span>
+                <span class="kd-summary-val">{{ avanceTroisMois.toLocaleString('fr-FR') }}</span>
+              </div>
+              <div class="kd-summary-row">
+                <span class="kd-summary-label">Frais de visite</span>
+                <span class="kd-summary-val kd-summary-val--vert">Gratuit</span>
+              </div>
+            </div>
+            <div class="kd-sidebar-total">
+              <span>Total à l'entrée</span>
+              <span>{{ formaterPrix(totalEntree, logement.devise) }}</span>
+            </div>
+            <div class="kd-sidebar-cta">
+              <button class="kd-sidebar-cta-btn" (click)="afficherToast('✅ Demande envoyée !')">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  width="14"
+                  height="14"
+                >
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                Demander une visite
+              </button>
+              <div class="kd-sidebar-cta-note">Aucun engagement · Réponse sous 24h</div>
+            </div>
+          </div>
+
+
+          <!-- BBV Score sidebar -->
+          <div class="kd-sidebar-card kd-sidebar-bbv-mini" *ngIf="logement.scoreConfiance">
+            <div class="kd-bbv-score-circle kd-bbv-score-circle--mini">
+              <div class="kd-bbv-score-num kd-bbv-score-num--mini">
+                {{ logement.scoreConfiance }}
+              </div>
+              <div class="kd-bbv-score-denom kd-bbv-score-denom--mini">/10</div>
+            </div>
+            <div>
+              <div class="kd-bbv-mini-title">Vérifié BBV</div>
+              <div class="kd-bbv-mini-sub">
+                {{ logement.verifications?.length ?? 0 }} points de contrôle passés
+              </div>
+            </div>
+            <svg
+              class="kd-bbv-mini-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="20"
+              height="20"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+          </div>
+
+          <!-- ── Sidebar : Eau & Courant résumé ── -->
+          <div
+            class="kd-sidebar-card kd-sidebar-services"
+            *ngIf="logement.infoEau || logement.infoElectricite"
+          >
+            <div class="kd-sidebar-services-title">Eau &amp; Courant</div>
+            <div class="kd-sidebar-service-row" *ngIf="logement.infoEau">
+              <span class="kd-sidebar-service-icon">💧</span>
+              <span>Eau</span>
+              <span
+                class="kd-sidebar-service-status"
+                [class.ok]="logement.infoEau.disponibilite === 'oui'"
+                [class.warn]="logement.infoEau.disponibilite === 'intermittent'"
+                [class.ko]="logement.infoEau.disponibilite === 'non'"
+              >
+                {{
+                  logement.infoEau.disponibilite === 'oui'
+                    ? '✓ Disponible'
+                    : logement.infoEau.disponibilite === 'intermittent'
+                      ? '~ Intermittent'
+                      : '✗ Absent'
+                }}
+              </span>
+            </div>
+            <div class="kd-sidebar-service-row" *ngIf="logement.infoElectricite">
+              <span class="kd-sidebar-service-icon">⚡</span>
+              <span>Courant</span>
+              <span
+                class="kd-sidebar-service-status"
+                [class.ok]="logement.infoElectricite.disponibilite === 'oui'"
+                [class.warn]="logement.infoElectricite.disponibilite === 'intermittent'"
+                [class.ko]="logement.infoElectricite.disponibilite === 'non'"
+              >
+                {{
+                  logement.infoElectricite.disponibilite === 'oui'
+                    ? '✓ Disponible'
+                    : logement.infoElectricite.disponibilite === 'intermittent'
+                      ? '~ Intermittent'
+                      : '✗ Absent'
+                }}
+              </span>
+            </div>
+            <div
+              class="kd-sidebar-service-row"
+              *ngIf="
+                logement.infoElectricite?.estCashPower &&
+                logement.infoElectricite?.montantRedevancesMensuels
+              "
+            >
+              <span class="kd-sidebar-service-icon"></span>
+              <span class="kd-sidebar-cashpower-detail"
+                >Cash Power :
+                {{ logement.infoElectricite!.montantRedevancesMensuels!.toLocaleString('fr-FR') }}
+                FCFA/mois</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ARTISANS RECOMMANDÉS DANS CE QUARTIER ── -->
+      <div class="kd-artisans-section" *ngIf="artisansRecommandes.length">
+        <div class="kd-artisans-header">
+          <h3 class="kd-artisans-title">
+            Artisans recommandés {{ logement.quartier ? 'à ' + logement.quartier : 'du quartier' }}
+          </h3>
+          <a routerLink="/artisans" class="kd-artisans-voir-tous">Voir tous les artisans →</a>
+        </div>
+        <div class="kd-artisans-liste">
+          <article class="kd-artisan-carte" *ngFor="let a of artisansRecommandes">
+            <div class="kd-artisan-carte-head">
+              <div class="kd-artisan-avatar">{{ a.initiales }}</div>
+              <div class="kd-artisan-infos">
+                <div class="kd-artisan-nom-row">
+                  <span class="kd-artisan-nom">{{ a.nom }}</span>
+                  <svg
+                    *ngIf="a.estVerifie"
+                    class="kd-artisan-verifie"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="12"
+                    height="12"
+                  >
+                    <path
+                      d="M12 2l2.4 1.6 2.9-.4 1 2.8 2.5 1.6-.6 2.9.6 2.9-2.5 1.6-1 2.8-2.9-.4L12 22l-2.4-1.6-2.9.4-1-2.8-2.5-1.6.6-2.9-.6-2.9 2.5-1.6 1-2.8 2.9.4z"
+                    />
+                    <path d="M9 12l2 2 4-4" />
+                  </svg>
+                </div>
+                <div class="kd-artisan-metier">{{ a.metier }} · {{ a.quartier }}</div>
+              </div>
+              <span
+                class="kd-artisan-statut"
+                [class.kd-artisan-statut--dispo]="a.disponible"
+                [class.kd-artisan-statut--indispo]="!a.disponible"
+              >
+                {{ a.disponible ? 'Disponible' : 'Indisponible' }}
+              </span>
+            </div>
+            <div class="kd-artisan-note-row">
+              <span class="kd-artisan-etoiles" aria-hidden="true">
+                <svg
+                  *ngFor="let e of etoilesArtisan(a.note)"
+                  width="11"
+                  height="11"
+                  viewBox="0 0 24 24"
+                  [attr.fill]="e ? 'currentColor' : 'none'"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
+                </svg>
+              </span>
+              <span class="kd-artisan-note-val">{{ a.note.toFixed(1) }}</span>
+              <span class="kd-artisan-note-nb">({{ a.nombreAvis }} avis)</span>
+            </div>
+            <button
+              class="kd-artisan-contact-btn"
+              [disabled]="!a.disponible"
+              (click)="contacterArtisan(a)"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.38 5.07L2 22l5.07-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm0 18c-1.6 0-3.1-.43-4.4-1.18l-.3-.18-3.03.8.8-2.96-.2-.31A7.94 7.94 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8-3.59 8-8 8z"
+                />
+              </svg>
+              Contacter
+            </button>
+          </article>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- fin .kd-popup-card -->
+
+  <!-- ══════════ MODAL PHOTOS ══════════ -->
+  <div
+    class="kd-modal-overlay kd-modal-overlay--galerie"
+    [class.kd-modal-overlay--open]="vueMedia === 'photos'"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="kd-modal-header">
+      <button class="kd-modal-back-btn" (click)="fermerVueMedia()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          width="14"
+          height="14"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Retour
+      </button>
+      <button class="kd-modal-close" (click)="fermerVueMedia()" aria-label="Fermer">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          width="14"
+          height="14"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div>
+        <div class="kd-modal-title">
+          Toutes les photos · {{ logement.titre || logement.typeBien }}
+        </div>
+        <div class="kd-modal-subtitle">
+          {{ logement.images.length }} photos · Prises par l'agent Kasa BBV
+        </div>
+      </div>
+    </div>
+    <div class="kd-photos-modal-body">
+      <div class="kd-photo-grid-item" *ngFor="let img of logement.images">
+        <img [src]="img" [alt]="logement.titre || logement.typeBien" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MODAL VISITE 3D ══════════ -->
+  <div
+    class="kd-modal-overlay"
+    [class.kd-modal-overlay--open]="vueMedia === 'pano'"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="kd-modal-header">
+      <button class="kd-modal-back-btn" (click)="fermerVueMedia()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          width="14"
+          height="14"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Retour
+      </button>
+      <button class="kd-modal-close" (click)="fermerVueMedia()" aria-label="Fermer">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          width="14"
+          height="14"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div>
+        <div class="kd-modal-title">{{ libellePiece(pieceActive3D) }} · Visite 3D 360°</div>
+        <div class="kd-modal-subtitle">
+          Pièce par pièce · {{ logement.titre || logement.typeBien }} BBV
+        </div>
+      </div>
+      <div class="kd-badge-360">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          width="12"
+          height="12"
+        >
+          <circle cx="12" cy="12" r="3" />
+          <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+        </svg>
+        360°
+      </div>
+    </div>
+    <div class="kd-pano-modal-body">
+      <div class="kd-pano-area">
+        <img
+          class="kd-pano-img"
+          [src]="imagePiece3D(pieceActive3D)"
+          [alt]="libellePiece(pieceActive3D)"
+        />
+      </div>
+      <div class="kd-room-thumbs">
+        <div
+          class="kd-room-thumb"
+          *ngFor="let p of pieces3D"
+          [class.kd-room-thumb--actif]="p.cle === pieceActive3D"
+          (click)="changerPiece3D(p.cle)"
+        >
+          <img [src]="imagePiece3D(p.cle)" [alt]="p.label" />
+          <div class="kd-room-thumb-label">{{ p.label }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ MODAL VIDÉO ══════════ -->
+  <div
+    class="kd-modal-overlay"
+    [class.kd-modal-overlay--open]="vueMedia === 'video'"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="kd-modal-header">
+      <button class="kd-modal-back-btn" (click)="fermerVueMedia()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          width="14"
+          height="14"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Retour
+      </button>
+      <button class="kd-modal-close" (click)="fermerVueMedia()" aria-label="Fermer">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          width="14"
+          height="14"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div>
+        <div class="kd-modal-title">
+          Vidéo walkthrough · {{ logement.titre || logement.typeBien }}
+        </div>
+        <div class="kd-modal-subtitle">{{ dureeVideoFormatee }} · Enregistrée par l'agent BBV</div>
+      </div>
+    </div>
+    <div class="kd-video-modal-body">
+      <video
+        #lecteurVideo
+        *ngIf="logement.videoUrl; else pasDeVideo"
+        class="kd-video-player"
+        [src]="logement.videoUrl"
+        [poster]="logement.images[0]"
+        controls
+        playsinline
+        controlsList="nodownload"
+      ></video>
+      <ng-template #pasDeVideo>
+        <div class="kd-video-placeholder">
+          <button
+            class="kd-video-play-btn"
+            (click)="afficherToast('Aucune vidéo disponible pour ce logement')"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </button>
+          <div class="kd-video-label">Walkthrough — {{ logement.titre || logement.typeBien }}</div>
+          <div class="kd-video-duration">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              width="12"
+              height="12"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            {{ dureeVideoFormatee }} · Agent certifié BBV
+          </div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- ══════════ MODAL CARTE ══════════ -->
+  <div
+    class="kd-modal-overlay"
+    [class.kd-modal-overlay--open]="vueMedia === 'carte'"
+    (click)="$event.stopPropagation()"
+  >
+    <div class="kd-modal-header">
+      <button class="kd-modal-back-btn" (click)="fermerVueMedia()">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          width="14"
+          height="14"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        Retour
+      </button>
+      <button class="kd-modal-close" (click)="fermerVueMedia()" aria-label="Fermer">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          width="14"
+          height="14"
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+      <div>
+        <div class="kd-modal-title">Emplacement · {{ logement.titre || logement.typeBien }}</div>
+        <div class="kd-modal-subtitle">
+          {{ logement.adresse || logement.quartier + ', ' + logement.ville }}
+        </div>
+      </div>
+    </div>
+    <div class="kd-map-modal-body" *ngIf="vueMedia === 'carte'">
+      <app-map
+        [logements]="[logement]"
+        [centre]="{ latitude: logement.latitude, longitude: logement.longitude }"
+        [zoom]="15"
+      ></app-map>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="kd-toast" [class.kd-toast--show]="messageToast">{{ messageToast }}</div>
+</div>

@@ -1,0 +1,497 @@
+@import '../../styles/design-tokens.css';
+/*
+  ╔═══════════════════════════════════════════════════════╗
+  ║  MapComponent KaSa — palette identique modal-detail   ║
+  ║  ATTENTION : var(--color-warning)  CRÈME : var(--color-bg)  VERT : var(--color-success)  ║
+  ╚═══════════════════════════════════════════════════════╝
+*/
+
+:host {
+  --km-orange: var(--color-warning);
+  --km-orange-h: var(--color-warning);
+  --km-bg: var(--color-bg);
+  --km-bg-2: var(--color-surface-tint);
+  --km-text: var(--color-ink);
+  --km-text-2: var(--color-ink-soft);
+  --km-muted: var(--color-ink-muted);
+  --km-border: var(--color-border);
+  --km-white: var(--color-surface);
+  --km-green: var(--color-success);
+  --km-green-bg: var(--color-success-bg);
+  --km-blue: var(--color-info);
+  --km-icon: var(--color-ink-muted);
+  --km-shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.1);
+  --km-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.14);
+  --km-radius: 10px;
+  --km-font: var(--font-body);
+}
+
+/* ═══════════ CONTENEUR PRINCIPAL ═══════════ */
+
+.carte-conteneur {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: var(--km-font);
+}
+
+.carte {
+  width: 100%;
+  height: 100%;
+}
+
+/* ═══════════ FOND DE CARTE ═══════════ */
+
+.controles-fond {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  background: var(--km-white);
+  padding: 3px;
+  border-radius: 8px;
+  box-shadow: var(--km-shadow-md);
+  border: 0.5px solid var(--km-border);
+}
+
+.bouton-fond {
+  border: none;
+  background: transparent;
+  padding: 6px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--km-text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--km-font);
+  transition: background 0.12s;
+}
+.bouton-fond:hover {
+  background: var(--km-bg-2);
+}
+.bouton-fond.actif {
+  background: var(--km-text);
+  color: var(--km-white);
+}
+
+/* ═══════════ BANDEAU SÉLECTION DE POSITION ═══════════ */
+
+.bandeau-selection-position {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  background: var(--km-orange);
+  color: var(--km-white);
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: var(--km-shadow-sm);
+  max-width: 90%;
+  text-align: center;
+}
+
+/* ═══════════ COMPTEUR ═══════════ */
+
+.compteur-resultats {
+  position: absolute;
+  top: 12px;
+  right: 116px;
+  z-index: 5;
+  background: var(--km-white);
+  border: 0.5px solid var(--km-border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--km-text);
+  box-shadow: var(--km-shadow-sm);
+}
+.compteur-niveau {
+  color: var(--km-muted);
+  font-weight: 400;
+}
+
+/* ═══════════ BARRE DROITE ═══════════ */
+
+.barre-droite {
+  position: absolute;
+  top: 50px;
+  right: 12px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ctrl-group {
+  background: var(--km-white);
+  border: 0.5px solid var(--km-border);
+  border-radius: var(--km-radius);
+  padding: 6px;
+  box-shadow: var(--km-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ctrl-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--km-muted);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0 2px 2px;
+}
+
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 0.5px solid transparent;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--km-text-2);
+  cursor: pointer;
+  font-family: var(--km-font);
+  white-space: nowrap;
+  transition:
+    background 0.12s,
+    color 0.12s;
+  position: relative;
+}
+.ctrl-btn:hover {
+  background: var(--km-bg-2);
+}
+.ctrl-btn--actif {
+  background: var(--km-text);
+  color: var(--km-white);
+  border-color: var(--km-text);
+}
+.ctrl-btn--actif:hover {
+  background: var(--km-text-2);
+}
+
+.ctrl-btn--icon {
+  justify-content: center;
+  padding: 8px;
+  border-radius: var(--km-radius);
+  background: var(--km-white);
+  border: 0.5px solid var(--km-border);
+  box-shadow: var(--km-shadow-sm);
+}
+
+.ctrl-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 15px;
+  height: 15px;
+  background: var(--km-text);
+  color: var(--color-surface);
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ═══════════ PANNEAU LATÉRAL (couches + proximité) ═══════════ */
+
+.panneau-lateral {
+  position: absolute;
+  top: 50px;
+  right: 128px;
+  z-index: 6;
+  width: 240px;
+  background: var(--km-white);
+  border: 0.5px solid var(--km-border);
+  border-radius: var(--km-radius);
+  box-shadow: var(--km-shadow-md);
+  padding: 10px 12px;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+}
+.panneau-lateral--ouvert {
+  display: flex;
+}
+
+.panneau-titre {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--km-text);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding-bottom: 6px;
+  border-bottom: 0.5px solid var(--km-border);
+  margin-bottom: 2px;
+}
+
+.panneau-desc {
+  font-size: 11px;
+  color: var(--km-muted);
+  line-height: 1.5;
+}
+
+.panneau-ligne {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--km-text-2);
+  cursor: pointer;
+  padding: 3px 0;
+}
+.panneau-ligne input[type='checkbox'] {
+  accent-color: var(--km-text);
+}
+
+.puce {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ═══════════ PANNEAU PROXIMITÉ ═══════════ */
+
+.panneau-proximite {
+  width: 280px;
+  top: 50px;
+}
+
+.prox-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 0.5px solid var(--km-border);
+}
+
+.prox-select {
+  padding: 6px 8px;
+  border: 0.5px solid var(--km-border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--km-font);
+  color: var(--km-text);
+  background: var(--km-bg);
+  cursor: pointer;
+}
+
+.prox-input {
+  padding: 6px 10px;
+  border: 0.5px solid var(--km-border);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--km-font);
+  color: var(--km-text);
+  background: var(--km-white);
+  outline: none;
+  transition: border-color 0.12s;
+}
+.prox-input:focus {
+  border-color: var(--km-text-2);
+}
+.prox-input::placeholder {
+  color: var(--km-muted);
+}
+
+.prox-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px;
+  background: var(--km-text);
+  color: var(--color-surface);
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--km-font);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.prox-add-btn:hover {
+  background: var(--km-text-2);
+}
+.prox-add-btn:disabled {
+  background: var(--km-border);
+  color: var(--km-muted);
+  cursor: not-allowed;
+}
+
+.prox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.prox-item {
+  background: var(--km-bg);
+  border: 0.5px solid var(--km-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.prox-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.prox-icone {
+  font-size: 15px;
+}
+
+.prox-libelle {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--km-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prox-suppr {
+  font-size: 11px;
+  color: var(--km-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.prox-suppr:hover {
+  color: var(--km-text);
+}
+
+.prox-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--km-text-2);
+}
+.prox-result-nb {
+  font-weight: 600;
+  color: var(--km-green);
+}
+.prox-result-rayon {
+  color: var(--km-muted);
+}
+
+.prox-vide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 0;
+  color: var(--km-muted);
+  font-size: 12px;
+  text-align: center;
+}
+.prox-vide svg {
+  opacity: 0.4;
+}
+.prox-vide-sub {
+  font-size: 11px;
+  color: var(--km-muted);
+  font-style: italic;
+}
+
+/* ═══════════ LÉGENDE ZONES PAR PRIX ═══════════ */
+
+.legende-zones {
+  position: absolute;
+  bottom: 28px;
+  left: 12px;
+  z-index: 5;
+  background: var(--km-white);
+  border: 0.5px solid var(--km-border);
+  border-radius: var(--km-radius);
+  padding: 8px 12px;
+  box-shadow: var(--km-shadow-sm);
+  font-size: 11px;
+  color: var(--km-text-2);
+}
+
+.legende-titre {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--km-muted);
+  margin-bottom: 6px;
+}
+
+.legende-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0;
+}
+
+.legende-puce {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+
+@media (max-width: 980px) {
+  /* Le parent .colonne-carte passe à une hauteur fixe de 360px en mobile
+     (voir logement_page.component.css). Sans cette règle, min-height:480px
+     forçait la carte à déborder de ~120px dans la liste juste en dessous —
+     c'est ce qui faisait "rentrer" le premier logement dans la carte. */
+  .carte-conteneur {
+    min-height: 0;
+    height: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .panneau-lateral,
+  .panneau-proximite {
+    width: calc(100vw - 80px);
+    right: 60px;
+  }
+  .barre-droite {
+    top: 44px;
+  }
+  .legende-zones {
+    bottom: 20px;
+  }
+}
+/* ═══ LIENS — palette warm ═══ */
+a {
+  color: var(--color-ink-soft);
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+a:hover {
+  color: var(--color-ink);
+}

@@ -1,0 +1,622 @@
+<header class="navbar">
+  <div class="navbar__left">
+    <a class="navbar__brand" href="#">
+      <img
+        class="navbar__logo"
+        src="/assets/images/logos/logo-kasa-64.png"
+        alt="KaSa"
+        width="34"
+        height="34"
+      />
+      <span class="navbar__brand-name">KaSa</span>
+    </a>
+
+    <span class="navbar__divider"></span>
+
+    <nav class="navbar__nav">
+      <a class="navbar__link" routerLink="/home" routerLinkActive="navbar__link--active">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3 11.5L12 4L21 11.5"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <path
+            d="M5 10V20H19V10"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        Logements
+      </a>
+  
+
+      <a class="navbar__link" routerLink="/budget" routerLinkActive="navbar__link--active">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" />
+          <path d="M3 10H21" stroke="currentColor" stroke-width="2" />
+          <path d="M7 14H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+        Simulateur
+      </a>
+      <a class="navbar__link" routerLink="/indice" routerLinkActive="navbar__link--active">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Indice des loyers
+      </a>
+      <a class="navbar__link" routerLink="/artisans" routerLinkActive="navbar__link--active">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a4 4 0 0 1-5.4 5.4L6.3 20.7a1.5 1.5 0 0 1-2.1-2.1L13.3 9.5a4 4 0 0 1 5.4-5.4z"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        Artisans
+      </a>
+
+      <a class="navbar__link" routerLink="/soutien" routerLinkActive="navbar__link--active">
+        Soutien logement
+      </a>
+    </nav>
+  </div>
+
+  <button
+    class="navbar__burger"
+    type="button"
+    [class.navbar__burger--ouvert]="menuOuvert"
+    (click)="toggleMenu()"
+    [attr.aria-expanded]="menuOuvert"
+    aria-label="Ouvrir le menu de navigation"
+  >
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line
+        x1="3"
+        y1="6"
+        x2="21"
+        y2="6"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <line
+        x1="3"
+        y1="12"
+        x2="21"
+        y2="12"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+      <line
+        x1="3"
+        y1="18"
+        x2="21"
+        y2="18"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      />
+    </svg>
+  </button>
+
+  <div class="navbar__right">
+    <div class="navbar__badge-wrapper">
+      <div class="navbar__badge" #badgeWrapper>
+        <button
+          class="navbar__badge-more"
+          type="button"
+          (click)="toggleServices($event)"
+          [attr.aria-expanded]="servicesOuvert"
+          aria-label="Voir tous les services"
+        >
+          <h1>⋯</h1>
+        </button>
+      </div>
+
+      <div class="navbar__services-popover" *ngIf="servicesOuvert" [ngStyle]="popoverStyle">
+        <p class="navbar__services-title">Tout ce qui vous attend sur KaSa</p>
+        <ul class="navbar__services-list">
+          <li class="navbar__services-item" *ngFor="let service of services">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <circle cx="12" cy="12" r="9" stroke="var(--color-ink-muted)" stroke-width="1.6" />
+              <path
+                d="M8.5 12.3L10.7 14.5L15.5 9.5"
+                stroke="var(--color-ink-muted)"
+                stroke-width="1.6"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+            {{ service.label }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- ── Non connecté ── -->
+    <button *ngIf="!estConnecte" class="navbar__login" type="button" (click)="ouvrirConnexion()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="8" r="4" stroke="var(--color-ink-muted)" stroke-width="2" />
+        <path
+          d="M4 20C4 16.5 7.5 14 12 14C16.5 14 20 16.5 20 20"
+          stroke="var(--color-ink-muted)"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+      Se connecter
+    </button>
+
+    <!-- ── Connecté ── -->
+    <div *ngIf="estConnecte" class="navbar__user-wrap" #userMenuRef>
+      <button
+        class="navbar__user-btn"
+        type="button"
+        (click)="toggleMenuUtilisateur($event)"
+        [attr.aria-expanded]="menuUtilisateurOuvert"
+      >
+        <div class="navbar__user-av">{{ utilisateur?.initiales }}</div>
+        <div class="navbar__user-info">
+          <span class="navbar__user-name">{{ utilisateur?.prenom }}</span>
+          <span class="navbar__user-role">{{ libelleRole }}</span>
+        </div>
+        <span class="navbar__user-notif" *ngIf="utilisateur?.notificationsNonLues">{{
+          utilisateur?.notificationsNonLues
+        }}</span>
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          class="navbar__user-chevron"
+          [class.navbar__user-chevron--open]="menuUtilisateurOuvert"
+        >
+          <path d="M6 9l6 6 6-6" />
+        </svg>
+      </button>
+
+      <div class="navbar__user-menu" *ngIf="menuUtilisateurOuvert">
+        <div class="navbar__user-menu-header">
+          <div class="navbar__user-av navbar__user-av--lg">{{ utilisateur?.initiales }}</div>
+          <div>
+            <div class="navbar__user-menu-name">
+              {{ utilisateur?.prenom }} {{ utilisateur?.nom }}
+            </div>
+            <div class="navbar__user-menu-email">{{ utilisateur?.email }}</div>
+            <div class="navbar__user-menu-since">Membre depuis {{ utilisateur?.membreDepuis }}</div>
+          </div>
+        </div>
+        <div class="navbar__user-menu-divider"></div>
+        <a class="navbar__user-menu-item" routerLink="/home" (click)="closeMenuUtilisateur()">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 12L12 4l9 8" />
+            <path d="M5 10v10h14V10" />
+          </svg>
+          Mes favoris
+        </a>
+        <a class="navbar__user-menu-item" routerLink="/home" (click)="closeMenuUtilisateur()">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          Mes visites
+        </a>
+        <a class="navbar__user-menu-item" routerLink="/home" (click)="closeMenuUtilisateur()">
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+          </svg>
+          Mon profil
+        </a>
+        <a
+          class="navbar__user-menu-item"
+          *ngIf="utilisateur?.role === 'gerant'"
+          routerLink="/gerant"
+          (click)="closeMenuUtilisateur()"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          Mon espace gérant
+        </a>
+        <a
+          class="navbar__user-menu-item"
+          *ngIf="utilisateur?.role === 'artisan'"
+          routerLink="/artisan"
+          (click)="closeMenuUtilisateur()"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+            />
+          </svg>
+          Mon espace artisan
+        </a>
+        <div class="navbar__user-menu-divider"></div>
+        <button
+          class="navbar__user-menu-item navbar__user-menu-item--danger"
+          type="button"
+          (click)="deconnecter()"
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+          Se déconnecter
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="navbar__services-overlay" *ngIf="servicesOuvert" (click)="closeServices()"></div>
+
+<div class="navbar__overlay" *ngIf="menuOuvert" (click)="toggleMenu()"></div>
+
+<aside class="navbar__drawer" *ngIf="menuOuvert">
+  <div class="navbar__drawer-header">
+    <a class="navbar__brand" href="#">
+      <img
+        class="navbar__logo"
+        src="assets/images/logos/logo-kasa-64.png"
+        alt="KaSa"
+        width="34"
+        height="34"
+      />
+      <span class="navbar__brand-name">KaSa</span>
+    </a>
+    <button
+      class="navbar__drawer-close"
+      type="button"
+      (click)="toggleMenu()"
+      aria-label="Fermer le menu"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <line
+          x1="5"
+          y1="5"
+          x2="19"
+          y2="19"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+        <line
+          x1="19"
+          y1="5"
+          x2="5"
+          y2="19"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <div class="navbar__drawer-body">
+    <div class="navbar__badge navbar__badge--drawer">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 2L4 5V11C4 16 7.5 20.5 12 22C16.5 20.5 20 16 20 11V5L12 2Z"
+          stroke="var(--color-ink-muted)"
+          stroke-width="1.6"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M9 12L11 14L15 10"
+          stroke="var(--color-ink-muted)"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span class="navbar__badge-text">
+        <strong>Annonces vérifiées</strong>
+        <small>GPS exact · Photos réelles</small>
+      </span>
+    </div>
+
+    <div class="navbar__services-panel">
+      <p class="navbar__services-title">Tout ce qui vous attend sur KaSa</p>
+      <ul class="navbar__services-list navbar__services-list--mobile">
+        <li
+          class="navbar__services-item"
+          *ngFor="let service of servicesMobileEtendu ? services : servicesApercuMobile"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="12" cy="12" r="9" stroke="var(--color-ink-muted)" stroke-width="1.6" />
+            <path
+              d="M8.5 12.3L10.7 14.5L15.5 9.5"
+              stroke="var(--color-ink-muted)"
+              stroke-width="1.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          {{ service.label }}
+        </li>
+      </ul>
+      <button
+        class="navbar__services-more"
+        type="button"
+        (click)="toggleServicesMobile()"
+        *ngIf="!servicesMobileEtendu"
+      >
+        Voir les {{ servicesRestants }} autres services
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 9L12 15L18 9"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        class="navbar__services-more"
+        type="button"
+        (click)="toggleServicesMobile()"
+        *ngIf="servicesMobileEtendu"
+      >
+        Voir moins
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M6 15L12 9L18 15"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <button
+        *ngIf="!estConnecte"
+        class="navbar__services-cta"
+        type="button"
+        (click)="ouvrirConnexion()"
+      >
+        Se connecter
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <path
+            d="M13 6L19 12L13 18"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <div *ngIf="estConnecte" class="navbar__drawer-user">
+        <div class="navbar__user-av">{{ utilisateur?.initiales }}</div>
+        <div>
+          <div style="font-size: 14px; font-weight: 700; color: var(--color-ink)">
+            {{ utilisateur?.prenom }} {{ utilisateur?.nom }}
+          </div>
+          <div style="font-size: 12px; color: var(--color-ink-muted)">{{ utilisateur?.email }}</div>
+        </div>
+      </div>
+      <button
+        *ngIf="estConnecte"
+        class="navbar__services-cta navbar__services-cta--danger"
+        type="button"
+        (click)="deconnecter()"
+      >
+        Se déconnecter
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
+
+    <p class="navbar__drawer-label">Rechercher</p>
+
+    <a
+      class="navbar__drawer-link"
+      routerLink="/home"
+      routerLinkActive="navbar__drawer-link--active"
+      (click)="toggleMenu()"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M3 11.5L12 4L21 11.5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+        <path
+          d="M5 10V20H19V10"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      Logements
+    </a>
+
+
+    <a
+      class="navbar__drawer-link"
+      routerLink="/budget"
+      routerLinkActive="navbar__drawer-link--active"
+      (click)="toggleMenu()"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2" />
+        <path d="M3 10H21" stroke="currentColor" stroke-width="2" />
+        <path d="M7 14H11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+      Simulateur
+    </a>
+    <a
+      class="navbar__drawer-link"
+      routerLink="/indice"
+      routerLinkActive="navbar__drawer-link--active"
+      (click)="toggleMenu()"
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Indice des loyers
+    </a>
+    <a
+      class="navbar__drawer-link"
+      routerLink="/artisans"
+      routerLinkActive="navbar__drawer-link--active"
+      (click)="toggleMenu()"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.1-3.1a4 4 0 0 1-5.4 5.4L6.3 20.7a1.5 1.5 0 0 1-2.1-2.1L13.3 9.5a4 4 0 0 1 5.4-5.4z"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      Artisans
+    </a>
+  </div>
+</aside>

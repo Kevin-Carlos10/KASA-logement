@@ -1,0 +1,316 @@
+<div
+  class="auth-overlay"
+  *ngIf="auth.modalOuverte()"
+  (click)="surFondClick($event)"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="auth-card">
+    <!-- Fermer -->
+    <button class="auth-close" (click)="fermer()" aria-label="Fermer">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+
+    <!-- Logo -->
+    <div class="auth-brand">
+      <img src="/assets/images/logos/logo-kasa-64.png" alt="KaSa" width="36" height="36" />
+      <span class="auth-brand-name">KaSa</span>
+    </div>
+
+    <!-- Onglets -->
+    <div class="auth-tabs">
+      <button
+        class="auth-tab"
+        [class.auth-tab--active]="onglet === 'connexion'"
+        (click)="basculer('connexion')"
+      >
+        Se connecter
+      </button>
+      <button
+        class="auth-tab"
+        [class.auth-tab--active]="onglet === 'inscription'"
+        (click)="basculer('inscription')"
+      >
+        Créer un compte
+      </button>
+    </div>
+
+    <!-- ── CONNEXION ── -->
+    <form *ngIf="onglet === 'connexion'" (ngSubmit)="soumettreCx()" class="auth-form" novalidate>
+      <p class="auth-subtitle">Connectez-vous pour accéder à toutes les fonctionnalités</p>
+
+      <!-- Comptes démo -->
+      <div class="auth-demos">
+        <p class="auth-demos-label">Comptes de démonstration :</p>
+        <div class="auth-demos-row">
+          <button
+            *ngFor="let d of COMPTES_DEMO"
+            type="button"
+            class="auth-demo-btn"
+            (click)="remplirDemo(d.email)"
+          >
+            <span class="auth-demo-av">{{ d.prenom[0] }}</span>
+            <span>
+              <strong>{{ d.prenom }}</strong>
+              <small>{{ d.role }}</small>
+            </span>
+          </button>
+        </div>
+        <p class="auth-demos-hint">Mot de passe unique : <code>kasa1234</code></p>
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Email</label>
+        <input
+          class="auth-input"
+          type="email"
+          autocomplete="email"
+          placeholder="votre@email.bf"
+          [(ngModel)]="emailConnexion"
+          name="emailCx"
+          required
+        />
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Mot de passe</label>
+        <div class="auth-pw-wrap">
+          <input
+            class="auth-input"
+            [type]="motDePasseVisible ? 'text' : 'password'"
+            autocomplete="current-password"
+            placeholder="••••••••"
+            [(ngModel)]="motDePasseConnexion"
+            name="pwCx"
+            required
+          />
+          <button
+            type="button"
+            class="auth-pw-eye"
+            (click)="motDePasseVisible = !motDePasseVisible"
+            tabindex="-1"
+          >
+            <svg
+              *ngIf="!motDePasseVisible"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <svg
+              *ngIf="motDePasseVisible"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+              />
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Erreur -->
+      <div class="auth-error" *ngIf="erreur">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        {{ erreur }}
+      </div>
+
+      <button type="submit" class="auth-btn-submit" [disabled]="chargement">
+        <span *ngIf="!chargement">Se connecter</span>
+        <span *ngIf="chargement" class="auth-spinner"></span>
+      </button>
+
+      <p class="auth-switch">
+        Pas encore de compte ?
+        <button type="button" class="auth-switch-link" (click)="basculer('inscription')">
+          Créer un compte
+        </button>
+      </p>
+    </form>
+
+    <!-- ── INSCRIPTION ── -->
+    <form
+      *ngIf="onglet === 'inscription'"
+      (ngSubmit)="soumettreInscription()"
+      class="auth-form"
+      novalidate
+    >
+      <p class="auth-subtitle">Rejoignez la plateforme immobilière de confiance au Burkina Faso</p>
+
+      <div class="auth-row-2">
+        <div class="auth-field">
+          <label class="auth-label">Prénom</label>
+          <input
+            class="auth-input"
+            type="text"
+            placeholder="Aïcha"
+            [(ngModel)]="prenomInscription"
+            name="prenom"
+            required
+          />
+        </div>
+        <div class="auth-field">
+          <label class="auth-label">Nom</label>
+          <input
+            class="auth-input"
+            type="text"
+            placeholder="Kaboré"
+            [(ngModel)]="nomInscription"
+            name="nom"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Email</label>
+        <input
+          class="auth-input"
+          type="email"
+          placeholder="votre@email.bf"
+          [(ngModel)]="emailInscription"
+          name="emailReg"
+          required
+        />
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Mot de passe</label>
+        <input
+          class="auth-input"
+          type="password"
+          placeholder="Min. 8 caractères"
+          [(ngModel)]="motDePasseInscription"
+          name="pwReg"
+          required
+        />
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Je suis</label>
+        <div class="auth-role-row">
+          <label
+            class="auth-role-option"
+            [class.auth-role-option--active]="roleInscription === 'locataire'"
+          >
+            <input type="radio" name="role" value="locataire" [(ngModel)]="roleInscription" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12L12 4l9 8" />
+              <path d="M5 10v10h14V10" />
+            </svg>
+            Locataire
+          </label>
+          <label
+            class="auth-role-option"
+            [class.auth-role-option--active]="roleInscription === 'gerant'"
+          >
+            <input type="radio" name="role" value="gerant" [(ngModel)]="roleInscription" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            Gérant
+          </label>
+          <label
+            class="auth-role-option"
+            [class.auth-role-option--active]="roleInscription === 'artisan'"
+          >
+            <input type="radio" name="role" value="artisan" [(ngModel)]="roleInscription" />
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+              />
+            </svg>
+            Artisan
+          </label>
+        </div>
+      </div>
+
+      <!-- Erreur -->
+      <div class="auth-error" *ngIf="erreur">
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        {{ erreur }}
+      </div>
+
+      <button type="submit" class="auth-btn-submit" [disabled]="chargement">
+        <span *ngIf="!chargement">Créer mon compte</span>
+        <span *ngIf="chargement" class="auth-spinner"></span>
+      </button>
+
+      <p class="auth-switch">
+        Déjà un compte ?
+        <button type="button" class="auth-switch-link" (click)="basculer('connexion')">
+          Se connecter
+        </button>
+      </p>
+    </form>
+  </div>
+</div>

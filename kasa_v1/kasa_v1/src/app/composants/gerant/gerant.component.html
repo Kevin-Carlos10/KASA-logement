@@ -1,0 +1,526 @@
+<app-barre-navigation />
+
+<div class="ge-page" *ngIf="!chargementEnCours && espace as e">
+  <a routerLink="/home" class="ge-retour">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+      <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+    </svg>
+    Retour
+  </a>
+
+  <!-- ── EN-TÊTE ── -->
+  <div class="ge-header">
+    <div class="ge-avatar">{{ e.initiales }}</div>
+    <div class="ge-header-info">
+      <div class="ge-name-row">Mon espace gérant</div>
+      <div class="ge-sub">
+        {{ e.nom }} · Agent terrain KaSa
+        <ng-container *ngIf="utilisateur?.membreDepuis"> · Membre depuis {{ utilisateur?.membreDepuis }}</ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── KPI ── -->
+  <div class="ge-stats">
+    <div class="ge-stat">
+      <div class="ge-stat-val">{{ e.logements.length }}</div>
+      <div class="ge-stat-label">Logements gérés</div>
+    </div>
+    <div class="ge-stat">
+      <div class="ge-stat-val">{{ e.noteMoyenne || '—' }}<span class="ge-stat-suffixe" *ngIf="e.noteMoyenne">/5</span></div>
+      <div class="ge-stat-label">Note moyenne</div>
+    </div>
+    <div class="ge-stat">
+      <div class="ge-stat-val">{{ e.nombreVisites }}</div>
+      <div class="ge-stat-label">Visites accompagnées</div>
+    </div>
+    <div class="ge-stat">
+      <div class="ge-stat-val">{{ e.nombreInterventions }}</div>
+      <div class="ge-stat-label">Interventions terrain</div>
+    </div>
+  </div>
+
+  <!-- ── ZONE D'INTERVENTION ── -->
+  <div class="ge-section" *ngIf="e.quartiersCouverts.length">
+    <h2 class="ge-section-title">Zone d'intervention</h2>
+    <div class="ge-quartiers">
+      <span class="ge-quartier-pill" *ngFor="let q of e.quartiersCouverts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+          <circle cx="12" cy="9" r="2.5" />
+        </svg>
+        {{ q }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── PORTEFEUILLE DE LOGEMENTS ── -->
+  <div class="ge-section">
+    <div class="ge-section-header">
+      <h2 class="ge-section-title">
+        {{ e.logements.length }} logement{{ e.logements.length > 1 ? 's' : '' }} géré{{ e.logements.length > 1 ? 's' : '' }}
+      </h2>
+      <button class="ge-btn ge-btn--primary" type="button" (click)="ouvrirCreation()">
+        + Créer un logement
+      </button>
+    </div>
+
+    <div class="ge-logement-card" *ngFor="let l of e.logements">
+      <div class="ge-logement-top">
+        <img [src]="l.images[0]" [alt]="l.quartier" loading="lazy" />
+        <div class="ge-logement-info">
+          <div class="ge-logement-titre">
+            {{ l.quartier }} · {{ l.typeBien }}
+            <span class="ge-badge-certifie" *ngIf="l.annonceCertifiee">Certifiée</span>
+            <span class="ge-badge-attente" *ngIf="!l.annonceCertifiee">Certification incomplète</span>
+          </div>
+          <div class="ge-logement-prix">{{ formaterPrix(l.prix, l.devise) }} /mois</div>
+          <div class="ge-logement-meta">
+            {{ l.nombreVisites || 0 }} visites · Publiée depuis {{ l.publieDepuis }}
+          </div>
+        </div>
+        <a class="ge-btn ge-btn--ghost" [routerLink]="['/logement', l.id]">Voir</a>
+      </div>
+
+      <!-- ── Toggle activation ── -->
+      <div class="ge-activation-row">
+        <span class="ge-activation-label">
+          <span class="ge-dot" [class.ge-dot--on]="l.estActif" [class.ge-dot--off]="!l.estActif"></span>
+          {{ l.estActif ? 'Visible sur la liste' : 'Masqué de la liste' }}
+        </span>
+        <div class="ge-toggle-wrap" [class.ge-toggle-disabled]="!estActivable(l)" [title]="!estActivable(l) ? 'Activation impossible : annonce créée ou modifiée il y a plus de 6 mois' : ''">
+          <button
+            type="button"
+            class="ge-toggle-switch"
+            [class.ge-toggle-switch--on]="l.estActif"
+            [disabled]="!estActivable(l)"
+            (click)="toggleActif(l)"
+            [attr.aria-label]="l.estActif ? 'Désactiver' : 'Activer'"
+          >
+            <span class="ge-toggle-knob"></span>
+          </button>
+          <span class="ge-toggle-hint" *ngIf="!estActivable(l)">
+            Annonce &gt; 6 mois — contacter KaSa pour réactiver
+          </span>
+        </div>
+      </div>
+
+      <div class="ge-logement-actions">
+        <button class="ge-btn ge-btn--outline" type="button" (click)="ouvrirEdition(l)">Modifier l'annonce</button>
+        <button class="ge-btn ge-btn--outline" type="button" (click)="ouvrirEditionPrix(l.id, l.prix)">Modifier le prix</button>
+        <button class="ge-btn ge-btn--outline" type="button" (click)="ouvrirSignalement(l.id)">Signaler</button>
+      </div>
+
+      <!-- Formulaire : modifier le prix -->
+      <div class="ge-inline-form" *ngIf="logementEnEditionPrix === l.id">
+        <div class="ge-field">
+          <label class="ge-label">Nouveau prix ({{ l.devise }})</label>
+          <input class="ge-input" type="number" [(ngModel)]="nouveauPrix" name="nouveauPrix" min="0" />
+        </div>
+        <div class="ge-field">
+          <label class="ge-label">Motif</label>
+          <input class="ge-input" type="text" [(ngModel)]="motifPrix" name="motifPrix" placeholder="Ex : ajustement suite à travaux" />
+        </div>
+        <div class="ge-inline-form-actions">
+          <button class="ge-btn ge-btn--primary" type="button" (click)="validerNouveauPrix()">Enregistrer</button>
+          <button class="ge-btn ge-btn--text" type="button" (click)="annulerEditionPrix()">Annuler</button>
+        </div>
+      </div>
+
+      <!-- Formulaire : signaler -->
+      <div class="ge-inline-form" *ngIf="logementEnEditionSignalement === l.id">
+        <div class="ge-field">
+          <label class="ge-label">Type de changement</label>
+          <select class="ge-input" [(ngModel)]="typeSignalementChoisi" name="typeSignalement">
+            <option *ngFor="let t of typesSignalement" [value]="t.valeur">{{ t.libelle }}</option>
+          </select>
+        </div>
+        <div class="ge-field">
+          <label class="ge-label">Description</label>
+          <textarea class="ge-input ge-textarea" [(ngModel)]="descriptionSignalement" name="descriptionSignalement" rows="2"></textarea>
+        </div>
+        <div class="ge-inline-form-actions">
+          <button class="ge-btn ge-btn--primary" type="button" (click)="validerSignalement()">Envoyer</button>
+          <button class="ge-btn ge-btn--text" type="button" (click)="annulerSignalement()">Annuler</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CHANGEMENTS TERRAIN ── -->
+  <div class="ge-section" *ngIf="e.changementsTerrain.length">
+    <h2 class="ge-section-title">Changements remontés du terrain</h2>
+    <div class="ge-changement" *ngFor="let c of e.changementsTerrain">
+      <div class="ge-changement-type">{{ c.type }}</div>
+      <div class="ge-changement-desc">{{ c.description }}</div>
+      <div class="ge-changement-meta">{{ c.quartier }} · {{ c.date }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="ge-loading" *ngIf="chargementEnCours">Chargement…</div>
+<div class="ge-introuvable" *ngIf="!chargementEnCours && espaceIntrouvable">
+  <p *ngIf="!estGerant">Cette page est réservée aux comptes gérant.</p>
+  <p *ngIf="estGerant">Aucun logement n'est encore rattaché à votre compte.</p>
+  <a routerLink="/home">Retour à la recherche</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     PANNEAU FORMULAIRE
+     ══════════════════════════════════════════════════ -->
+<div class="ge-overlay" *ngIf="panneauFormulaireOuvert" (click)="fermerFormulaire()">
+  <div class="ge-panneau" (click)="$event.stopPropagation()">
+    <div class="ge-panneau-header">
+      <h2>{{ modeFormulaire === 'creation' ? 'Créer un logement' : "Modifier l'annonce" }}</h2>
+      <button class="ge-panneau-fermer" type="button" (click)="fermerFormulaire()" aria-label="Fermer">✕</button>
+    </div>
+
+    <div class="ge-panneau-corps">
+
+      <!-- ── 0. QUI GÈRE ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Qui gère cette annonce ?</h3>
+        <div class="ge-toggle-role">
+          <button type="button" class="ge-toggle-btn" [class.ge-toggle-btn--actif]="brouillon.enTantQueBailleur" (click)="brouillon.enTantQueBailleur = true">
+            Je suis le bailleur
+          </button>
+          <button type="button" class="ge-toggle-btn" [class.ge-toggle-btn--actif]="!brouillon.enTantQueBailleur" (click)="brouillon.enTantQueBailleur = false">
+            Agent terrain d'un bailleur
+          </button>
+        </div>
+        <ng-container *ngIf="!brouillon.enTantQueBailleur">
+          <div class="ge-field">
+            <label class="ge-label">Nom complet du bailleur *</label>
+            <input class="ge-input" type="text" [(ngModel)]="brouillon.nomBailleur" name="nomBailleur" placeholder="Ex : Fatimata Kaboré" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Langue parlée (optionnel)</label>
+            <input class="ge-input" type="text" [(ngModel)]="brouillon.langueBailleur" name="langueBailleur" placeholder="Ex : Mooré" />
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- ── 1. IDENTIFICATION ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Identification du bien</h3>
+        <div class="ge-form-grid">
+          <div class="ge-field">
+            <label class="ge-label">Type de bien *</label>
+            <select class="ge-input" [(ngModel)]="brouillon.typeBien" name="typeBien">
+              <option *ngFor="let t of typesBien" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Type de location *</label>
+            <select class="ge-input" [(ngModel)]="brouillon.typeLocation" name="typeLocation">
+              <option *ngFor="let t of typesLocation" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Quartier autocomplete -->
+        <div class="ge-field ge-field--autocomplete">
+          <label class="ge-label">Quartier * <span class="ge-label-hint">(choisi automatiquement via la carte)</span></label>
+          <div class="ge-autocomplete-wrap">
+            <input
+              class="ge-input"
+              type="text"
+              [(ngModel)]="quartierQuery"
+              name="quartierQuery"
+              placeholder="Ex : Ouaga 2000"
+              (input)="onQuartierInput()"
+              (blur)="fermerDropdownQuartier()"
+              autocomplete="off"
+            />
+            <ul class="ge-dropdown" *ngIf="quartierDropdownVisible">
+              <li *ngFor="let q of quartiersFiltered" (mousedown)="choisirQuartier(q)">{{ q }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="ge-form-grid">
+          <div class="ge-field">
+            <label class="ge-label">Ville *</label>
+            <input class="ge-input" type="text" [(ngModel)]="brouillon.ville" name="ville" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Adresse (optionnel)</label>
+            <input class="ge-input" type="text" [(ngModel)]="brouillon.adresse" name="adresse" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Nombre de chambres *</label>
+            <input class="ge-input" type="number" min="0" [(ngModel)]="brouillon.nombreChambres" name="nombreChambres" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Surface (m², optionnel)</label>
+            <input class="ge-input" type="number" min="0" [(ngModel)]="brouillon.surfaceM2" name="surfaceM2" />
+          </div>
+        </div>
+
+        <!-- Intérieur : cuisine, WC, douche -->
+        <div class="ge-form-section-sub">
+          <div class="ge-label ge-label--group">Équipements intérieurs</div>
+          <div class="ge-checkboxes-inline">
+            <label class="ge-checkbox-label">
+              <input type="checkbox" [(ngModel)]="brouillon.cuisine" name="cuisine" />
+              <span class="ge-checkbox-box">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="white" stroke-width="2.5"><polyline points="2 8 6 12 14 4"/></svg>
+              </span>
+              🍳 Cuisine intégrée
+            </label>
+            <label class="ge-checkbox-label">
+              <input type="checkbox" [(ngModel)]="brouillon.wcInterne" name="wcInterne" />
+              <span class="ge-checkbox-box">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="white" stroke-width="2.5"><polyline points="2 8 6 12 14 4"/></svg>
+              </span>
+              🚽 WC interne
+            </label>
+            <label class="ge-checkbox-label">
+              <input type="checkbox" [(ngModel)]="brouillon.doucheInterne" name="doucheInterne" />
+              <span class="ge-checkbox-box">
+                <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="white" stroke-width="2.5"><polyline points="2 8 6 12 14 4"/></svg>
+              </span>
+              🚿 Douche interne
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 2. PRIX & CONDITIONS ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Prix & conditions</h3>
+        <div class="ge-form-grid">
+          <div class="ge-field">
+            <label class="ge-label">Loyer mensuel *</label>
+            <input class="ge-input" type="number" min="0" [(ngModel)]="brouillon.prix" name="prix" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Devise</label>
+            <input class="ge-input" type="text" [(ngModel)]="brouillon.devise" name="devise" />
+          </div>
+        </div>
+        <div class="ge-field">
+          <label class="ge-label">Conditions de location</label>
+          <input class="ge-input" type="text" [(ngModel)]="brouillon.conditionsLocation" name="conditionsLocation" placeholder="Ex : Caution 2 mois + avance 3 mois" />
+        </div>
+        <div class="ge-field" *ngIf="modeFormulaire === 'edition'">
+          <label class="ge-label">Motif du changement de prix</label>
+          <input class="ge-input" type="text" [(ngModel)]="brouillon.motifPrix" name="motifPrix" placeholder="Ex : ajustement suite à travaux" />
+        </div>
+      </div>
+
+      <!-- ── 3. LOCALISATION ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Localisation</h3>
+        <p class="ge-form-hint">
+          Cliquez sur la carte pour pointer l'emplacement exact. Le quartier sera détecté automatiquement.
+        </p>
+        <div class="ge-form-map">
+          <app-map
+            [modeMini]="true"
+            [modeSelectionPosition]="true"
+            [positionInitiale]="positionCarte"
+            (positionChoisie)="onPositionChoisie($event)"
+          />
+        </div>
+        <p class="ge-form-position" *ngIf="positionCarte">
+          ✓ Position enregistrée : {{ positionCarte.latitude | number: '1.4-4' }}, {{ positionCarte.longitude | number: '1.4-4' }}
+        </p>
+        <p class="ge-form-position ge-form-position--vide" *ngIf="!positionCarte">
+          ⚠ Aucune position sélectionnée
+        </p>
+      </div>
+
+      <!-- ── 4. EAU (ONEA) ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Eau (ONEA)</h3>
+        <div class="ge-form-grid">
+          <div class="ge-field">
+            <label class="ge-label">Disponibilité</label>
+            <select class="ge-input" [(ngModel)]="brouillon.infoEau.disponibilite" name="eauDispo">
+              <option *ngFor="let o of optionsDisponibilite" [value]="o.valeur">{{ o.libelle }}</option>
+            </select>
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Type de compteur</label>
+            <select class="ge-input" [(ngModel)]="brouillon.infoEau.typeCompteur" name="eauCompteur">
+              <option *ngFor="let o of optionsCompteur" [value]="o.valeur">{{ o.libelle }}</option>
+            </select>
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Fréquence coupures</label>
+            <select class="ge-input" [(ngModel)]="brouillon.infoEau.frequenceCoupures" name="eauCoupures">
+              <option [ngValue]="undefined">—</option>
+              <option *ngFor="let o of optionsFrequenceCoupures" [value]="o.valeur">{{ o.libelle }}</option>
+            </select>
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Dernière facture ONEA *</label>
+            <input class="ge-input" type="date" [(ngModel)]="brouillon.dateFactureOnea" name="dateFactureOnea" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 4bis. ÉLECTRICITÉ (SONABEL) ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Électricité (SONABEL)</h3>
+        <div class="ge-form-grid">
+          <div class="ge-field">
+            <label class="ge-label">Disponibilité</label>
+            <select class="ge-input" [(ngModel)]="brouillon.infoElectricite.disponibilite" name="elecDispo">
+              <option *ngFor="let o of optionsDisponibilite" [value]="o.valeur">{{ o.libelle }}</option>
+            </select>
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Type de compteur</label>
+            <select class="ge-input" [(ngModel)]="brouillon.infoElectricite.typeCompteur" name="elecCompteur">
+              <option *ngFor="let o of optionsCompteur" [value]="o.valeur">{{ o.libelle }}</option>
+            </select>
+          </div>
+          <div class="ge-field ge-field--checkbox">
+            <label class="ge-label">
+              <input type="checkbox" [(ngModel)]="brouillon.infoElectricite.estCashPower" name="cashPower" />
+              Compteur CASHPOWER (prépayé)
+            </label>
+          </div>
+          <div class="ge-field" *ngIf="brouillon.infoElectricite.estCashPower">
+            <label class="ge-label">Redevances mensuelles (FCFA)</label>
+            <input class="ge-input" type="number" min="0" [(ngModel)]="brouillon.infoElectricite.montantRedevancesMensuels" name="redevances" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Dernière facture SONABEL *</label>
+            <input class="ge-input" type="date" [(ngModel)]="brouillon.dateFactureSonabel" name="dateFactureSonabel" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 5. DESCRIPTION & ÉQUIPEMENTS ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Description & équipements</h3>
+        <div class="ge-field">
+          <label class="ge-label">Description *</label>
+          <textarea class="ge-input ge-textarea" rows="3" [(ngModel)]="brouillon.description" name="description" placeholder="Décrivez le logement, l'environnement, les atouts…"></textarea>
+        </div>
+        <div class="ge-field">
+          <label class="ge-label">Équipements</label>
+          <div class="ge-chips" *ngIf="brouillon.equipements.length">
+            <span class="ge-chip" *ngFor="let eq of brouillon.equipements; let i = index">
+              {{ eq }}
+              <button type="button" class="ge-chip-retirer" (click)="retirerEquipement(i)" aria-label="Retirer">✕</button>
+            </span>
+          </div>
+          <div class="ge-ajout-inline">
+            <input class="ge-input" type="text" [(ngModel)]="nouvelEquipement" name="nouvelEquipement" placeholder="Ex : Parking, Climatisation…" (keydown.enter)="$event.preventDefault(); ajouterEquipement()" />
+            <button class="ge-btn ge-btn--outline" type="button" (click)="ajouterEquipement()">Ajouter</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 6. PHOTOS ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">
+          Photos *
+          <span class="ge-section-badge">{{ photosPreview.length }} photo{{ photosPreview.length > 1 ? 's' : '' }}</span>
+        </h3>
+        <p class="ge-form-hint">Prenez des photos directement ou chargez depuis votre galerie. Obligatoire.</p>
+
+        <div class="ge-media-actions">
+          <button type="button" class="ge-media-btn" (click)="declencherCamera()" [disabled]="uploadPhotoEnCours">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+            Prendre des photos
+          </button>
+          <button type="button" class="ge-media-btn ge-media-btn--outline" (click)="declencherGaleriePhoto()" [disabled]="uploadPhotoEnCours">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+            Importer depuis la galerie
+          </button>
+        </div>
+
+        <div class="ge-photos-grid" *ngIf="photosPreview.length">
+          <div class="ge-photo-thumb" *ngFor="let p of photosPreview; let i = index">
+            <img [src]="p.url" alt="Photo {{ i + 1 }}" loading="lazy" />
+            <span class="ge-photo-source">{{ p.source === 'camera' ? '📷' : '🖼️' }}</span>
+            <button type="button" class="ge-photo-retirer" (click)="retirerPhoto(i)" aria-label="Supprimer">✕</button>
+          </div>
+        </div>
+
+        <div class="ge-upload-loading" *ngIf="uploadPhotoEnCours">Chargement des photos…</div>
+        <p class="ge-field-required" *ngIf="!photosPreview.length && !uploadPhotoEnCours">⚠ Au moins une photo est requise</p>
+      </div>
+
+      <!-- ── 7. VIDÉO ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Vidéo complète du logement *</h3>
+        <p class="ge-form-hint">Filmez l'intégralité du logement (toutes les pièces). Obligatoire pour publier.</p>
+
+        <ng-container *ngIf="!videoPreview">
+          <div class="ge-media-actions">
+            <button type="button" class="ge-media-btn" (click)="declencherCameraVideo()" [disabled]="uploadVideoEnCours">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+              Filmer maintenant
+            </button>
+            <button type="button" class="ge-media-btn ge-media-btn--outline" (click)="declencherGalerieVideo()" [disabled]="uploadVideoEnCours">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Charger une vidéo
+            </button>
+          </div>
+          <div class="ge-upload-loading" *ngIf="uploadVideoEnCours">Chargement de la vidéo…</div>
+          <p class="ge-field-required" *ngIf="!uploadVideoEnCours">⚠ La vidéo est obligatoire</p>
+        </ng-container>
+
+        <div class="ge-video-preview" *ngIf="videoPreview">
+          <video [src]="videoPreview.url" controls class="ge-video-player" preload="metadata"></video>
+          <div class="ge-video-meta">
+            <span class="ge-video-duree" *ngIf="videoPreview.duree">
+              ✓ Durée : {{ formaterDureeVideo(videoPreview.duree) }}
+            </span>
+            <button type="button" class="ge-btn ge-btn--text ge-btn--danger" (click)="supprimerVideo()">Supprimer la vidéo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 8. CAUTION ALTERNATIVE ── -->
+      <div class="ge-form-section">
+        <h3 class="ge-form-section-title">Caution alternative (optionnel)</h3>
+        <div class="ge-field ge-field--checkbox">
+          <label class="ge-label">
+            <input type="checkbox"
+              [checked]="!!brouillon.cautionAlternative"
+              (change)="brouillon.cautionAlternative = $any($event.target).checked ? { disponible: true, cotisationMensuelle: 0, moisCautionEvites: 2 } : undefined"
+            />
+            Proposer une cotisation mensuelle à la place de la caution classique
+          </label>
+        </div>
+        <div class="ge-form-grid" *ngIf="brouillon.cautionAlternative as ca">
+          <div class="ge-field">
+            <label class="ge-label">Cotisation mensuelle (FCFA)</label>
+            <input class="ge-input" type="number" min="0" [(ngModel)]="ca.cotisationMensuelle" name="cotisation" />
+          </div>
+          <div class="ge-field">
+            <label class="ge-label">Mois de caution évités</label>
+            <input class="ge-input" type="number" min="0" [(ngModel)]="ca.moisCautionEvites" name="moisEvites" />
+          </div>
+        </div>
+      </div>
+
+      <p class="ge-form-erreur" *ngIf="erreurFormulaire">{{ erreurFormulaire }}</p>
+    </div>
+
+    <div class="ge-panneau-footer">
+      <button class="ge-btn ge-btn--text" type="button" (click)="fermerFormulaire()">Annuler</button>
+      <button class="ge-btn ge-btn--primary" type="button" [disabled]="enregistrementEnCours" (click)="enregistrerLogement()">
+        {{ enregistrementEnCours ? 'Enregistrement…' : modeFormulaire === 'creation' ? "Publier l'annonce" : 'Enregistrer les modifications' }}
+      </button>
+    </div>
+  </div>
+</div>

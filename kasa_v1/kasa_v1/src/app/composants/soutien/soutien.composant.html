@@ -1,0 +1,82 @@
+<app-barre-navigation />
+
+<section class="soutien-page">
+  <!-- ── Aide à l'entrée / au maintien dans le logement ── -->
+  <div class="kd-aide-banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 1 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
+    </svg>
+    <div class="kd-aide-text">
+      <strong>Besoin d'un soutien pour votre logement ?</strong>
+      Charges, avance, caution, ameublement… KaSa travaille sur un dispositif
+      d'accompagnement financier pour les locataires. Manifestez votre besoin dès
+      maintenant.
+    </div>
+    <button type="button" class="kd-aide-btn" (click)="ouvrirFormulaireAide()">
+      Manifester une demande
+    </button>
+  </div>
+
+  <!-- ══════════ MODAL : DEMANDE DE SOUTIEN ══════════ -->
+  <div
+    class="kd-aide-modal-overlay"
+    *ngIf="afficherModalAide"
+    (click)="fermerFormulaireAide()"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="kd-aide-modal-card" (click)="$event.stopPropagation()">
+      <button class="kd-aide-modal-close" (click)="fermerFormulaireAide()" aria-label="Fermer" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="14" height="14">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+
+      <div class="kd-aide-modal-title">Manifester une demande de soutien</div>
+      <p class="kd-aide-modal-subtitle">
+        Cette demande n'entraîne <strong>aucun versement</strong> pour le moment. Elle
+        nous permet d'évaluer les besoins réels des locataires afin de construire un
+        dispositif d'accompagnement conforme et de vous recontacter dès son
+        lancement.
+      </p>
+
+      <form (ngSubmit)="soumettreDemandeAide()" class="kd-aide-form" novalidate>
+        <label class="kd-aide-form__label" for="aide-numero">Votre numéro</label>
+        <input
+          id="aide-numero"
+          class="kd-aide-form__input"
+          type="tel"
+          placeholder="Ex : +226 70 12 34 56"
+          [(ngModel)]="formAideNumero"
+          name="aideNumero"
+          autocomplete="tel"
+        />
+
+        <label class="kd-aide-form__label" for="aide-raison">Raison de la demande</label>
+        <select id="aide-raison" class="kd-aide-form__select" [(ngModel)]="formAideRaison" name="aideRaison">
+          <option *ngFor="let r of raisons" [value]="r.valeur">{{ r.label }}</option>
+        </select>
+
+        <label class="kd-aide-form__label" for="aide-montant">Montant souhaité (FCFA)</label>
+        <input
+          id="aide-montant"
+          class="kd-aide-form__input"
+          type="number"
+          min="1"
+          step="1"
+          placeholder="Ex : 100000"
+          [(ngModel)]="formAideMontant"
+          name="aideMontant"
+        />
+
+        <button type="submit" class="kd-aide-form__submit" [disabled]="!formulaireValide">
+          Envoyer ma demande
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="kd-toast" [class.kd-toast--show]="messageToast">{{ messageToast }}</div>
+</section>

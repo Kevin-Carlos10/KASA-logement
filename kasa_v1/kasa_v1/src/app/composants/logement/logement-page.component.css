@@ -1,0 +1,205 @@
+@import '../../styles/design-tokens.css';
+
+.page-resultats {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.colonne-carte {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  min-width: 0;
+}
+
+.colonne-liste {
+  padding: 24px 28px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-width: 0;
+}
+
+.entete-liste {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.entete-liste h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0;
+  color: var(--color-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.compteur {
+  font-size: 14px;
+  color: var(--color-ink-soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════════════════════
+   GRILLE DE LOGEMENTS
+   Toujours 2 colonnes maximum, quelle que soit la taille
+   d'écran (jamais 3 sur une même ligne). min-width:0 sur les
+   items empêche tout débordement horizontal du à un contenu
+   trop large (ex: textes en nowrap dans les cartes).
+   ══════════════════════════════════════════════════════════ */
+.grille-logements {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.grille-logements > * {
+  min-width: 0;
+}
+
+.etat-chargement {
+  color: var(--color-ink-soft);
+  font-size: 14px;
+}
+
+.toast-action {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--color-ink);
+  color: var(--color-surface);
+  padding: 12px 18px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-overlay);
+  font-size: 13.5px;
+  font-weight: 500;
+  z-index: 50;
+  animation: apparition-toast 0.18s ease;
+  max-width: calc(100vw - 32px);
+}
+
+.toast-action button {
+  background: transparent;
+  border: none;
+  color: var(--color-surface);
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 13.5px;
+  padding: 0;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+@keyframes apparition-toast {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* ── ≤ 980px : la carte passe au-dessus, la liste occupe toute la largeur ── */
+@media (max-width: 980px) {
+  .page-resultats {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .colonne-carte {
+    position: relative;
+    height: 360px;
+    overflow: hidden;
+  }
+
+  .colonne-liste {
+    padding: 16px 0 24px;
+  }
+
+  .entete-liste {
+    padding: 0 16px;
+    gap: 8px;
+  }
+
+  .etat-chargement {
+    padding: 0 16px;
+  }
+
+  .grille-logements {
+    gap: 16px;
+    padding: 0 16px;
+  }
+}
+
+/* ── ≤ 640px : réglages intermédiaires (phablette / petite tablette) ── */
+@media (max-width: 640px) {
+  .colonne-carte {
+    height: 300px;
+  }
+
+  .entete-liste h1 {
+    font-size: 19px;
+  }
+
+  .compteur {
+    font-size: 13px;
+  }
+}
+
+/* ── ≤ 500px : plus assez de place pour 2 colonnes confortables,
+     la grille repasse en une seule colonne ── */
+@media (max-width: 500px) {
+  .colonne-carte {
+    height: 240px;
+  }
+
+  .grille-logements {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 0 12px;
+  }
+
+  .colonne-liste {
+    padding: 14px 0 20px;
+  }
+
+  .entete-liste {
+    padding: 0 12px;
+  }
+
+  .etat-chargement {
+    padding: 0 12px;
+  }
+}
+
+/* ── ≤ 360px : très petits téléphones ── */
+@media (max-width: 360px) {
+  .entete-liste h1 {
+    font-size: 17px;
+  }
+
+  .grille-logements {
+    padding: 0 10px;
+    gap: 12px;
+  }
+
+  .entete-liste,
+  .etat-chargement {
+    padding: 0 10px;
+  }
+}

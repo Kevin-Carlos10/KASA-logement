@@ -1,0 +1,148 @@
+<article
+  class="carte-logement"
+  [class.survolee]="estSurvole"
+  (mouseenter)="onSurvol()"
+  (click)="onClic()"
+>
+  <div class="carrousel">
+    <img
+      class="image-logement"
+      [src]="logement.images[indexImageCourante]"
+      [alt]="logement.quartier + ' - ' + logement.typeBien"
+      loading="lazy"
+    />
+
+    <div
+      class="badge-confiance"
+      [class.en-attente]="!logement.annonceCertifiee"
+    >
+      <svg
+        class="icone-badge-confiance"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        aria-hidden="true"
+      >
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+      {{ logement.annonceCertifiee ? 'Annonce vérifiée' : 'Vérification en cours' }}
+    </div>
+
+    <button
+      *ngIf="logement.images.length > 1"
+      type="button"
+      class="fleche fleche-gauche"
+      (click)="imagePrecedente($event)"
+      aria-label="Image précédente"
+    >
+      ‹
+    </button>
+    <button
+      *ngIf="logement.images.length > 1"
+      type="button"
+      class="fleche fleche-droite"
+      (click)="imageSuivante($event)"
+      aria-label="Image suivante"
+    >
+      ›
+    </button>
+
+    <div class="conteneur-options">
+      <button
+        type="button"
+        class="bouton-options"
+        aria-label="Plus d'options"
+        [attr.aria-expanded]="menuOuvert"
+        (click)="basculerMenu($event)"
+      >
+        ⋯
+      </button>
+
+      <div class="menu-options" *ngIf="menuOuvert" (click)="$event.stopPropagation()">
+        <button type="button" class="item-menu" (click)="surEnregistrer($event)">
+          <svg
+            class="icone-menu"
+            viewBox="0 0 20 20"
+            aria-hidden="true"
+            [class.pleine]="estEnregistre"
+          >
+            <path
+              d="M5 2.5A1.5 1.5 0 0 1 6.5 1h7A1.5 1.5 0 0 1 15 2.5v15.79a.5.5 0 0 1-.766.424L10 15.9l-4.234 2.813A.5.5 0 0 1 5 18.29V2.5Z"
+            />
+          </svg>
+          {{ estEnregistre ? 'Retirer des favoris' : 'Enregistrer' }}
+        </button>
+
+        <button type="button" class="item-menu" (click)="surMasquer($event)">
+          <svg class="icone-menu" viewBox="0 0 20 20" aria-hidden="true">
+            <path
+              d="M2.28 2.22a.75.75 0 0 0-1.06 1.06l15.5 15.5a.75.75 0 1 0 1.06-1.06l-1.84-1.84A10.9 10.9 0 0 0 19.5 10c-1.6-3.94-5.4-6.5-9.5-6.5-1.6 0-3.13.39-4.48 1.09L2.28 2.22Zm4.8 4.8L8.6 8.53A2.5 2.5 0 0 0 11.47 11.4l1.51 1.51a4 4 0 0 1-5.4-5.4ZM10 4.5c4.1 0 7.9 2.56 9.5 6-.62 1.32-1.5 2.5-2.57 3.42l-2.1-2.1a4 4 0 0 0-5.15-5.15L8.36 5.35A9.9 9.9 0 0 1 10 4.5ZM.5 10c.62-1.32 1.5-2.5 2.57-3.42l1.6 1.6A9 9 0 0 0 3 10c.98 2.02 2.7 3.6 4.78 4.5l1.3 1.3A9.6 9.6 0 0 1 .5 10Z"
+            />
+          </svg>
+          Masquer
+        </button>
+      </div>
+    </div>
+
+    <div class="puces-carrousel" *ngIf="logement.images.length > 1">
+      <span
+        *ngFor="let image of logement.images; let i = index"
+        class="puce-carrousel"
+        [class.active]="i === indexImageCourante"
+        (click)="allerAImage(i, $event)"
+      ></span>
+    </div>
+  </div>
+
+  <div class="contenu-carte">
+    <p class="ligne-titre">
+      <span class="quartier">{{ logement.quartier }}</span>
+      <span class="separateur">|</span>
+      <span class="type-bien">{{ logement.typeLocation }}</span>
+      <span class="distance">
+        <svg class="icone-pin" viewBox="0 0 20 20" aria-hidden="true">
+          <path
+            d="M10 0C6.13 0 3 3.13 3 7c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 10 4.5a2.5 2.5 0 0 1 0 5z"
+          />
+        </svg>
+        {{ formaterDistance() }}
+      </span>
+    </p>
+
+    <p class="prix">
+      {{ formaterPrix() }}
+      <span class="periode">/mois</span>
+    </p>
+
+    <p class="description">{{ logement.description }}</p>
+
+    <p class="ligne-hote">
+      <span class="avatar-hote">{{ logement.hote.initiales }}</span>
+      <span class="nom-hote">{{ logement.hote.nom }}</span>
+      <svg
+        *ngIf="logement.hote.estVerifie"
+        class="icone-verifie"
+        viewBox="0 0 20 20"
+        aria-hidden="true"
+        role="img"
+        title="Hôte vérifié"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M6.267 3.455a3.066 3.066 0 0 0 1.745-.723 3.066 3.066 0 0 1 3.976 0 3.066 3.066 0 0 0 1.745.723 3.066 3.066 0 0 1 2.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 0 1 0 3.976 3.066 3.066 0 0 0-.723 1.745 3.066 3.066 0 0 1-2.812 2.812 3.066 3.066 0 0 0-1.745.723 3.066 3.066 0 0 1-3.976 0 3.066 3.066 0 0 0-1.745-.723 3.066 3.066 0 0 1-2.812-2.812 3.066 3.066 0 0 0-.723-1.745 3.066 3.066 0 0 1 0-3.976 3.066 3.066 0 0 0 .723-1.745 3.066 3.066 0 0 1 2.812-2.812Zm7.44 5.252a1 1 0 0 0-1.414-1.414L9 10.586 7.707 9.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4Z"
+        />
+      </svg>
+      <span class="separateur">|</span>
+      <span class="note">
+        <svg class="icone-etoile" viewBox="0 0 20 20" aria-hidden="true">
+          <path
+            d="M10 1l2.939 6.034 6.561.954-4.75 4.66 1.121 6.53L10 16.347l-5.871 3.831 1.121-6.53-4.75-4.66 6.561-.954L10 1z"
+          />
+        </svg>
+        {{ logement.hote.note }} <span class="separateur">|</span> {{ logement.publieDepuis }}
+      </span>
+    </p>
+  </div>
+</article>

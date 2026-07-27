@@ -1,0 +1,13 @@
+/* You can add global styles to this file, and also import other style files */
+@import 'maplibre-gl/dist/maplibre-gl.css';
+@import './app/styles/design-tokens.css';
+
+/* Base reset : la page consomme les tokens ci-dessus (fond + police globale) */
+html,
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}

@@ -1,0 +1,84 @@
+<div class="elc-wrap" *ngIf="donneesPrix.length || donneesBbv.length">
+  <div class="elc-tabs">
+    <button
+      type="button"
+      class="elc-tab"
+      [class.elc-tab--actif]="ongletActif === 'prix'"
+      *ngIf="donneesPrix.length"
+      (click)="changerOnglet('prix')"
+    >
+      Évolution du loyer
+    </button>
+    <button
+      type="button"
+      class="elc-tab"
+      [class.elc-tab--actif]="ongletActif === 'bbv'"
+      *ngIf="donneesBbv.length"
+      (click)="changerOnglet('bbv')"
+    >
+      Score de confiance BBV
+    </button>
+  </div>
+
+  <!-- ── Panneau : évolution du loyer ── -->
+  <div class="elc-panel" *ngIf="ongletActif === 'prix' && donneesPrix.length">
+    <div class="elc-meta">
+      <div>
+        <div class="elc-meta-val">{{ prixActuel?.toLocaleString('fr-FR') }} {{ devise }}</div>
+        <div class="elc-meta-label">Loyer actuel / mois</div>
+      </div>
+      <div class="elc-meta-peak" *ngIf="prixPic">
+        Plus élevé&nbsp;:
+        <span class="elc-peak-val">{{ prixPic.valeur.toLocaleString('fr-FR') }} {{ devise }}</span>
+        ({{ prixPic.label }})
+      </div>
+    </div>
+    <div class="elc-chart-wrap">
+      <canvas #canvasPrix role="img" aria-label="Courbe d'évolution du loyer mensuel"></canvas>
+      <div
+        class="elc-marker"
+        *ngFor="let m of markersPrix"
+        [style.left.px]="m.x"
+        [style.top.px]="m.y"
+        [title]="m.nom"
+      >
+        <span>{{ m.icone }}</span>
+      </div>
+    </div>
+    <div class="elc-note">
+      Le loyer évolue selon la valorisation du quartier, les travaux ou équipements ajoutés au
+      logement, et les négociations avec les locataires successifs.
+    </div>
+  </div>
+
+  <!-- ── Panneau : score de confiance BBV ── -->
+  <div class="elc-panel" *ngIf="ongletActif === 'bbv' && donneesBbv.length">
+    <div class="elc-meta">
+      <div>
+        <div class="elc-meta-val">{{ bbvActuel?.toFixed(1) }} / 10</div>
+        <div class="elc-meta-label">Score BBV actuel</div>
+      </div>
+      <div class="elc-meta-peak" *ngIf="bbvPic">
+        Plus haut&nbsp;: <span class="elc-peak-val">{{ bbvPic.valeur.toFixed(1) }} / 10</span> ({{
+          bbvPic.label
+        }})
+      </div>
+    </div>
+    <div class="elc-chart-wrap">
+      <canvas
+        #canvasBbv
+        role="img"
+        aria-label="Courbe d'évolution du score de confiance BBV"
+      ></canvas>
+      <div
+        class="elc-marker"
+        *ngFor="let m of markersBbv"
+        [style.left.px]="m.x"
+        [style.top.px]="m.y"
+        [title]="m.nom"
+      >
+        <span>{{ m.icone }}</span>
+      </div>
+    </div>
+  </div>
+</div>

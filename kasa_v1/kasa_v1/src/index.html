@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>KasaV1</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    // Applique le thème avant le premier rendu pour éviter un flash clair/sombre.
+    (function () {
+      try {
+        var t = localStorage.getItem('kasa-theme');
+        if (t !== 'clair' && t !== 'sombre') {
+          t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'sombre' : 'clair';
+        }
+        document.documentElement.setAttribute('data-theme', t === 'sombre' ? 'dark' : 'light');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>
